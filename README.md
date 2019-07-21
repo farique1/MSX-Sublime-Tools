@@ -11,7 +11,7 @@ There tools are composed of:
 - A Build System to convert and run the Dignified version and run the Classic one.  
 - A Comment Preference for the Dignified version.  
   
-To install, just clone this repo and copy all root files into an `MSX` folder inside the Sublime `Packages` folder (`~/Library/Application Support/Sublime Text 3\Packages\` on a Mac).  
+To install, just clone this repo and copy all root files into an `MSX` folder inside the Sublime `Packages` folder (`~/Library/Application Support/Sublime Text 3/Packages/` on a Mac).  
   
 ## Syntax Highlight  
   
@@ -36,10 +36,10 @@ One of the biggest differences is the Dignified version expects the instructions
 The Classic version also has all the Dignified specifics removed for simplicity but maintains useful ones like the labels highlight on its `REM` lines.  
   
 Here is a preview of them side by side:  
-![# Versions](https://github.com/farique1/MSX-Sublime-Syntax/blob/master/Images/Versions.png)  
+![# Versions](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Versions.png)  
   
 And here some specifics for the Dignified version:  
-![# Highlights](https://github.com/farique1/MSX-Sublime-Syntax/blob/master/Images/Highlights.png)  
+![# Highlights](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Highlights.png)  
   
   
 1. `REM` scope extends as long as there are line breaks (these lines will be joined together into a single line after the conversion).  
