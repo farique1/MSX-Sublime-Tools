@@ -1,0 +1,269 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+name: MSX Basic Dignified
+file_extensions: bad
+scope: source.msxbasicdignified
+
+# All case insensitive
+contexts:
+  main:
+    # Double quotes
+    - match: '"'
+      push: double_quoted_string
+
+    # Badig Build configs
+    - match: (^##BB:)(export_path|export_file|convert_only|throttle|arguments)(=)(.*$)
+      captures:
+        1: comment.msxbasic
+        2: variable.parameter.msxbasic
+        3: comment.msxbasic
+        4: entity.name.class.line.msxbasic
+
+    # Comment line ' ## REM
+    - match: (?i:'|##|rem)
+      push: comment_line
+
+    # DATA line highlights elements and comma only
+    - match: '(?i:data)'
+      push: data_line
+      scope: keyword.control.msxbasic
+
+    # Labels with only numbers
+    - match: '{\d+?}'
+      scope: invalid.msxbasic
+
+    # Labels with valid chacateres
+    - match: '{(\w+?|@)}'
+      scope: entity.name.class.line.msxbasic
+
+    # Labels with everithing else
+    - match: '{.+?}'
+      scope: invalid.msxbasic
+
+    # Round brackets balancing warning (only highlights missing closed)
+    - match: \(
+      push: brackets
+    - match: \)
+      scope: invalid.msxbasic
+
+    # Define lines
+    - match: (?i:^\s*define)
+      scope: variable.parameter.msxbasic
+
+    # Define [?@] - print at
+    - match: '\[\?@\]'
+      scope: keyword.control.msxbasic
+
+    # Define brackets
+    - match: '\[.+?\]'
+      scope: variable.parameter.msxbasic
+
+    # Declare only numbers
+    - match: (~\d+(\$|\d))\W #(?=\s+|\s*$)
+      captures:
+        1: invalid.msxbasic
+
+    # Declare less than 3 characters
+    - match: (~\w{0,1}(\w\$|\w))\W #(?=\s|\s*$)
+      captures:
+        1: invalid.msxbasic
+
+    # Declare indicator
+    - match: ((~)\w+(\$|\w)) #(\s+|\s*$)
+      captures:
+        1: constant.global.msxbasic
+        2: variable.parameter.msxbasic
+
+    # Declare error
+    # Not used for now. Badig does not return error with special character
+    # on ~ declared variable, it just assumes the name has ended.
+    # - match: (~\S+?)(?=\s+|\s*$)
+    #   scope: invalid.msxbasic
+
+    # Declare lines
+    - match: (?i:^\s*declare)
+      push: declare_line
+      scope: variable.parameter.msxbasic
+
+    # Special cases for on xxx goto/gosub (are there more?)
+    - match: \b(?i:error|interval|key|sprite|stop|strig)\s*(?=(?i:goto|gosub))\b
+      scope: support.function.msxbasic
+
+    # Instructions (several are position and context sensitive)
+    # review: base key play strig stick pdl pad time date set...
+    # catching 'key' if after ^ or : unless folowed by (
+    - match: \b(?i:\_(adjust|pause|pcmplay|pcmrec)|as(?=\s*#|\s*\w+\$)|auto|beep|bload|bsave|(call)(\sadjust|\spause|\spcmplay|\spcmrec|\b)|circle|clear|cload|close|cls|cmd|color|cont|copy|copy|csave|csrlin|data|(def)(dbl|(?=\s?fn)|int|sng|str|\s?usr)|delete|dim|draw|dsko\$|else|end|erase|error|field|files|for|get|gosub|goto|if|input|interval|ipl|kanji|(?<=:|^)\s*key(?!\()|kill|let|line|list|llist|load|locate|lprint|lset|maxfiles|merge|motor|name|new|next|off|on|open|out|paint|play(?!(\()| +\()|point|poke|preset|print|pset|put|read|renum|restore|resume|return|rset|run|save|screen|(set)(\sadjust|\sbeep|\spage|\spassword|\sprompt|\sscreen|\sscroll|\stitle|\svideo|\b)|sound|sprite\$|sprite|step|stop|swap|then|to|troff|tron|using|vpoke|wait|width)\b
+      scope: keyword.control.msxbasic
+
+    # Functions no $ (several are position and context sensitive)
+    # review: base key play strig stick pdl pad time date set...
+    - match: \b(?i:abs|asc|atn|base|cdbl|cdbl|cint|cint|cos|csng|csng|cvd|cvi|cvs|date|dskf|eof|erl|err|exp|fix|fn|fpos|fre|inp|instr|int|key|len|loc|lof|log|lpos|pad|pdl|peek|play(?=(\(|\s+\())|pos|rnd|sgn|sin|spc|sqr|stick|strig|tab|tan|time|usr|val|varptr|varptr|vdp|vpeek)\b
+      scope: support.function.msxbasic
+
+    # Functions $ (several are position and context sensitive)
+    - match: \b(?i:attr\$|bin\$|chr\$|hex\$|inkey\$|input\$|left\$|mid\$|mkd\$|mki\$|mks\$|oct\$|right\$|space\$|str\$|string\$)
+      scope: support.function.msxbasic
+
+    # Endif if alone
+    - match: (?i:^\s*endif\s*$)
+      scope: keyword.control.msxbasic
+
+    # ? do not work with the \b on the instrunctions match
+    - match: \?
+      scope: keyword.control.msxbasic
+
+    # Endif if not alone nor on rem, quote, data
+    - match: (?i:endif)
+      scope: invalid.deprecated.msxbasic
+
+    # Line join character _
+    - match: '_(\s+(?=$|(?=##)))'
+      push: break_line
+      scope: variable.parameter.msxbasic
+
+    # colon - instruction separator
+    - match: ':'
+      scope: comment.msxbasic
+
+    # Separators
+    - match: '[.,;]'
+      scope: keyword.operator.msxbasic
+
+    # Operators signs
+    - match: (?i:\+|-|\*|/|\^|\\|=|<|>)
+      scope: keyword.operator.msxbasic
+
+    # Operators names
+    - match: \b(?i:and|or|not|xor|eqv|imp|mod)\b
+      scope: keyword.operator.msxbasic
+
+    # Variables
+    - match: '[A-Za-z]\d'
+      scope: constant.global.msxbasic
+
+    # Hex and binary numbers (bug if word after hex touching and beggining with a-f)
+    - match: '(&[hH])([0-9a-fA-F]+|)|(&[bB])([01]+|)'
+      captures:
+        2: constant.numeric.msxbasic
+        4: constant.numeric.msxbasic
+
+    # Number at begining of line
+    - match: (^\s*)(\d+)\s*(\d*)
+      captures:
+        2: invalid.deprecated.msxbasic
+        3: invalid.deprecated.msxbasic
+
+    # Numbers
+    - match: \b([0-9]+[0-9]*|0)\b
+      scope: constant.numeric.msxbasic
+
+  # this mess needs simplification!!!
+  # Actually, why all this? I don't even know anymore.
+  declare_line:
+    - meta_scope: constant.global.msxbasic
+    - match: '(\s*)(,)'
+      captures:
+        2: invalid.deprecated.msxbasic
+      # only numbers
+    - match: '(\s*|\s*(~))(\d+(\$|\d))(\s*(,)\s*$|(\s*,\s*,)|(\s*,)|\s*$|(\s+##.*$))'
+      captures:
+        2: invalid.msxbasic
+        3: invalid.msxbasic
+        6: invalid.deprecated.msxbasic
+        7: invalid.deprecated.msxbasic
+        8: keyword.operator.msxbasic
+        9: comment.msxbasic
+      # less than 3 characters
+    - match: '(\s*|\s*(~))(\S{0,1}(\S\$|\S))(\s*(,)\s*$|(\s*,\s*,)|(\s*,)|\s*$|(\s+##.*$))'
+      captures:
+        2: invalid.msxbasic
+        3: invalid.msxbasic
+        6: invalid.deprecated.msxbasic
+        7: invalid.deprecated.msxbasic
+        8: keyword.operator.msxbasic
+        9: comment.msxbasic
+      # legal variables and rem
+    - match: '(\s*|\s*~)(\w+(\$|\w))(\s*(,)\s*$|(\s*,\s*,)|(\s*,)|\s*$|(\s+##.*$))'
+      captures:
+        1: keyword.operator.msxbasic
+        2: constant.global.msxbasic
+        5: invalid.deprecated.msxbasic
+        6: invalid.deprecated.msxbasic
+        7: keyword.operator.msxbasic
+        8: comment.msxbasic
+      # everythong else
+    - match: '\s*([^\s].+?)(\s*(,)\s*$|(\s*(,\s*,))|(\s*,)|\s*$|(\s+##.*$))'
+      captures:
+        1: invalid.msxbasic
+        3: invalid.deprecated.msxbasic
+        5: invalid.deprecated.msxbasic
+        6: keyword.operator.msxbasic
+        7: comment.msxbasic
+    - match: $
+      pop: true
+
+  break_line:
+    - match: (^|\s*)\d+
+      scope: constant.numeric.msxbasic
+    - match: ((?=_)|\n)
+      pop: true
+    - include: main
+
+    # Quotes: show join line character _
+  double_quoted_string:
+    - meta_scope: string.quoted.double.msxbasic
+    - match: '_(\s+$)'
+      scope: variable.parameter.msxbasic
+    - match: '"|[^_]$'
+      pop: true
+
+    # Comments: include labels and continues next line if ending wit : or _
+  comment_line:
+    - match: '{\d+?}'
+    - meta_scope: comment.msxbasic
+    - match: '{(\w+?|@)}'
+      scope: entity.name.class.line.msxbasic
+    - match: (^\s*)((?i:endif))(?=\s*$)
+      captures:
+        2: invalid.deprecated.msxbasic
+    - match: '\_\s*$\n'
+      scope: variable.parameter.msxbasic
+    - match: '\:\s*$\n'
+      push:
+        - match: (^\s*)((?i:endif))(?=\s*$)
+          captures:
+            2: invalid.deprecated.msxbasic
+        - match:  (^\s*)(\d+)\s*(\d*)
+          captures:
+            2: invalid.deprecated.msxbasic
+            3: invalid.deprecated.msxbasic
+        - match: '(?<!:)(?<!_)(?=$\n)'
+          pop: true
+    - match: '(?<!:)(?<!_)$\n'
+      pop: true
+
+    # DATA: show join lines character _ and continue next line with _ (stops if :)
+    # Bug > ## comment stops the highlight. can be avoided adding _ at the end
+  data_line:
+    - meta_scope: constant.global.msxbasic
+    - match: ','
+      scope: keyword.operator.msxbasic
+    - match: '_(\s+($|(?=##)))'
+      scope: variable.parameter.msxbasic
+    - match: '".*"'
+      scope: constant.global.msxbasic
+    - match: '(?<!\S)##.*'
+      scope: comment.msxbasic
+    - match: (^\s*)((?i:endif))(?=\s*$)
+      captures:
+        2: invalid.deprecated.msxbasic
+    - match: '((?<!_)$\n|:)'
+      scope: comment.msxbasic
+      pop: true
+
+    # Round brackets
+  brackets:
+    - match: \)
+      pop: true
+    - include: main

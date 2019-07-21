@@ -1,0 +1,14 @@
+{
+    "cmd": ["python", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name"],
+    "file_regex": "(?:^\\*\\*\\*\\s)(.*):\\s\\((\\d+)\\):()(.*)$",
+    "selector": "source.msxbasicdignified",
+    "working_dir": "$project_path",
+    "file_patterns": "*.bad",
+    "syntax": "MSX Badig Build.sublime-syntax",
+    "variants": [
+
+	    { "name": "Convert only",
+	      "cmd": ["python", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-convert"],
+	    }
+	]
+} 
