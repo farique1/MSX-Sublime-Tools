@@ -5,9 +5,9 @@ For Sublime Text 3
   
 >[**MSX Basic Dignified**](https://github.com/farique1/msx-basic-dignified) allows you to code MSX Basic programs using modern coding standards on your preferred editor, convert them to the old MSX Basic structure and load it into an MSX (emulated or not.)  
   
-There tools are composed of:  
+The tools are composed of:  
 - A Syntax Highlight for the Dignified and one for the Classic version of MSX Basic.  
-- Ocean and Monokai based Themes with special scopes for the project.  
+- A Boxy Ocean and a Monokai based Theme with special scopes for the project.  
 - A Build System to convert and run the Dignified version and run the Classic one.  
 - A Comment Preference for the Dignified version.  
   
@@ -38,7 +38,7 @@ The Classic version also has all the Dignified specifics removed for simplicity 
 Here is a preview of them side by side:  
 ![# Versions](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Versions.png)  
   
-And here some specifics for the Dignified version:  
+And here are some specifics of the Dignified version:  
 ![# Highlights](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Highlights.png)  
   
   
@@ -46,10 +46,10 @@ And here some specifics for the Dignified version:
 2. The same goes for the `DATA` information; in this case a `_` line break is needed as a `:` denote the end of the instruction.  
 3. Quotes explicitly expects a `_` to continue on the next line. MSX Basic support open quotes so a line feed will just end the quote.  
   
-MSX Basic Dignified still has issues on some fringe cases so the syntax highlight will try to point some of these potential issues as well as some irregularities that are taken care by the conversion.  
+MSX Basic Dignified still has issues on some fringe cases so the syntax highlight will try to point some of these potential problems as well as some irregularities that are taken care by the conversion.  
   
-4. Leading line numbers are issued automatically so they should not be on the Dignified code; they will be removed automatically with a warning. However numbers beginning a broken `REM` line after a `:` are improperly removed. Both cases are highlighted with a warning.  
-5. `ENDIF`s alone on a line are automatically removed on the conversion. However `ENDIF` commands not alone are not removed (will generate a warning) and `ENDIF`s that are part of another command but are alone due to an line break (`_`) are improperly removed. Both cases are highlighted with a warning.  
+4. Leading line numbers are issued automatically so they should not be on the Dignified code; they will be removed automatically with a warning. However numbers beginning a broken `REM` line after a `:` are improperly removed. Both cases are highlighted as a warning.  
+5. `ENDIF`s alone on a line are automatically removed on the conversion. However `ENDIF` commands not alone are not removed (will generate a warning) and `ENDIF`s that are part of another command but are alone due to an line break (`_`) are improperly removed. Both cases are highlighted as a warning.  
 6. Errors that stop the execution of the conversion are highlighted as errors.  
   
   
@@ -65,7 +65,7 @@ They improve the MSX syntax highlight (Classic and Dignified) with scopes specif
   
 ## Build System  
   
-The Dignified code can be converted and run straight from Sublime using **openMSX**.  
+The Dignified code can be converted and run straight from Sublime using **MSX Basic Dignified** and **openMSX**.  
 The Classic code can also run from Sublime, no need for a conversion here.  
   
 >The build system only works on a Mac for now, mostly due to path differences.  
@@ -88,7 +88,7 @@ MSX Badig Build.sublime-syntax
   
 Before it can be used, however, some requirements  must be met:  
 - An installed copy of **openMSX**.  
-- An **openMSX** `savestate` file with the MSX booted up and disk drive capability must be made. This is necessary to speed things a little since Sublime will open a new instance of openMSX for each build.  
+- An **openMSX** `savestate` file with the MSX booted up and disk drive capability must be made. This is necessary to speed things a little since Sublime will open a new instance of **openMSX** for each build.  
 - If coding in the Dignified version, a copy of **MSX Basic Dignified** must also be present.  
 - `MSX Badig Build.ini` must be set up with the path to **openMSX**, the `savestate` file and `msxbadig.py`.  
   
@@ -103,7 +103,7 @@ To run the build just press CTRL-B on Sublime.
 *Convert and Run* an *Convert Only* can be toggled by pressing CTRL-SHIFT-B on a Dignified code. There is no need for a conversion on the Classic code so it will always just *Run*.  
   
 The build will convert the Dignified code using the default settings of **MSX Basic Dignified**, these can be configured in its own `.ini` file.  
-By default the converted Classic code will be saved on the same path as the Dignified code with its name truncated to the first 8 characters and a `.bas` extension added.  
+By default the converted Classic code will be saved on the same path as the Dignified code with its name truncated to the first 8 characters and a `.bas` extension.  
 **openMSX** will then be opened with *throttle on*, load the `savestate`, mount the converted file folder as a disk and a `RUN "<converted_file>"+RETURN` command will be sent.  
 Every build command will open a new instance of **openMSX**.  
   
@@ -116,20 +116,21 @@ Some of those options can be configured with *REM tags* on the Dignified code it
 ##BB:throttle=<True/False>  
 ##BB:arguments=<msx_basic_dignified_command_line_arguments>  
 ```  
+
 `##BB:export_path=`  
-: The path where the converted code should be saved. This path will be mounted as a drive on **openMSX**  
+The path where the converted code should be saved. This path will be mounted as a drive on **openMSX**.  
   
 `##BB:export_file=`  
-: The name of the converted file. Better with an 8 character name and a `.bas` extension.  
+The name of the converted file. Better with an 8 character name and a `.bas` extension.  
   
 `##BB:convert_only=`  
-: `True` or `False`. If true will only convert the code, otherwise will convert and run. Overrides the Sublime build settings.  
+`True` or `False`. If true will only convert the code, otherwise will convert and run. Overrides the Sublime build settings.  
   
 `##BB:throttle=`  
-: `True` or `False`. Force **openMSX** to open with or without *throttle on*.  
+`True` or `False`. Force **openMSX** to open with or without *throttle on*.  
   
 `##BB:arguments=`  
-: Pass conversion arguments overriding the defaults and the `.ini` file on **MSX Basic Dignified**. The arguments are the same as the ones used on the command line and must be separated by commas.  
+Pass conversion arguments overriding the defaults and the `.ini` file on **MSX Basic Dignified**. The arguments are the same as the ones used on the command line and must be separated by commas.  
   
 Sublime will display the build output on the console and highlight warnings and errors.  
   
@@ -137,7 +138,7 @@ Sublime will display the build output on the console and highlight warnings and 
   
 `MSX Comments.tmPreferences`  
   
-Set `##` as the default hotkey comment.  
+Set `##` as the default comment.  
 `##` is a Dignified comment that is not converted to the Classic code.  
 There is no block comment but all lines selected will be commented.  
   
