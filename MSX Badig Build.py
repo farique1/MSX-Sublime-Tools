@@ -1,3 +1,14 @@
+"""
+
+MSX Badig Build
+v1.0
+A build system to run MSX Basic Dignified source or tradicional
+MSX Basic code on openMSX straight from Sublime Text 3.
+
+Copyright (C) 2019 - Fred Rique (farique)
+https://github.com/farique1/MSX-Sublime-Tools/
+"""
+
 import subprocess
 import argparse
 import ConfigParser

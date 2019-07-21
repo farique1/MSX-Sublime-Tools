@@ -1,9 +1,12 @@
 ' CHANGE GRAPH KIT
 ' v1.2.5
 ' Bug fixes
+## Long name variables
 ' Edit uncompressed graphics on MSX binary files on disk
 ' Copyright (1984 - 2019) - Fred Rique (farique)
 ' https://github.com/farique1/Change-Graph-Kit
+## Convert to Classic MSX Basic with MSX Basic Dignified
+## https://github.com/farique1/msx-basic-dignified
 '
 
 ## Sublime Build settings
