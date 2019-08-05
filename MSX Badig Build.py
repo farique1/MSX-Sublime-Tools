@@ -1,12 +1,14 @@
 """
-
 MSX Badig Build
-v1.0
+v1.1
 A build system to run MSX Basic Dignified source or tradicional
 MSX Basic code on openMSX straight from Sublime Text 3.
 
 Copyright (C) 2019 - Fred Rique (farique)
 https://github.com/farique1/MSX-Sublime-Tools/
+
+5-8-2019
+Only call SDL render AFTER loading the file. MUCH faster!
 """
 
 import subprocess
@@ -115,10 +117,17 @@ export_path = export_path.replace(' ', r'\ ')
 export_file = export_file.replace(' ', r'\ ')
 
 cmd = (openmsx_filepath + '/contents/macos/openmsx -control stdio -savestate ' + savestate_filepath)
-
 proc = subprocess.Popen([cmd], shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
-proc.stdin.write('<command>set renderer SDL</command>')
+proc.stdin.write('<command>set throttle off</command>')
+proc.stdin.flush()
+print "---", proc.stdout.readline().rstrip()
+
+proc.stdin.write('<command>debug set_watchpoint write_mem 0xfffe {[debug read "memory" 0xfffe] == 0} {set renderer SDL}</command>')
+proc.stdin.flush()
+print "---", proc.stdout.readline().rstrip()
+
+proc.stdin.write('<command>debug set_watchpoint write_mem 0xfffe {[debug read "memory" 0xfffe] == 1} {set throttle on}</command>')
 proc.stdin.flush()
 print "---", proc.stdout.readline().rstrip()
 
@@ -130,12 +139,20 @@ proc.stdin.write('<command>diska insert ' + export_path + '</command>')
 proc.stdin.flush()
 print "---", proc.stdout.readline().rstrip()
 
-if throttle:
-    proc.stdin.write('<command>set throttle off</command>')
+proc.stdin.write('<command>type_via_keybuf load"' + export_file + '\\r</command>')
+proc.stdin.flush()
+print "---", proc.stdout.readline().rstrip()
+
+proc.stdin.write('<command>type_via_keybuf poke-2,0\\r</command>')
+proc.stdin.flush()
+print "---", proc.stdout.readline().rstrip()
+
+if not throttle:
+    proc.stdin.write('<command>type_via_keybuf poke-2,1\\r</command>')
     proc.stdin.flush()
     print "---", proc.stdout.readline().rstrip()
 
-proc.stdin.write('<command>type_via_keybuf run"' + export_file + '\\r</command>')
+proc.stdin.write('<command>type_via_keybuf cls:run\\r</command>')
 proc.stdin.flush()
 print "---", proc.stdout.readline().rstrip()
 
