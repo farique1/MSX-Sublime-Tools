@@ -1,8 +1,12 @@
 %YAML 1.2
 ---
 # See http://www.sublimetext.com/docs/3/syntax.html
+author: Fred Rique (farique)
+url: https://github.com/farique1/MSX-Sublime-Tools
+comment: v1.1
+
 name: MSX Basic
-file_extensions: bas
+file_extensions: [bas, asc]
 scope: source.msxbasic
 
 # All case insensitive

@@ -1,6 +1,10 @@
 %YAML 1.2
 ---
 # See http://www.sublimetext.com/docs/3/syntax.html
+author: Fred Rique (farique)
+url: https://github.com/farique1/MSX-Sublime-Tools
+comment: v1.1
+
 name: MSX Basic Dignified
 file_extensions: bad
 scope: source.msxbasicdignified
@@ -13,7 +17,7 @@ contexts:
       push: double_quoted_string
 
     # Badig Build configs
-    - match: (^##BB:)(export_path|export_file|convert_only|throttle|arguments)(=)(.*$)
+    - match: (^##BB:)(export_path|export_file|convert_only|throttle|arguments|override_machine|override_extension)(=)(.*$)
       captures:
         1: comment.msxbasic
         2: variable.parameter.msxbasic
@@ -63,10 +67,20 @@ contexts:
     - match: \b(?i:error|interval|key|sprite|stop|strig)\s*(?=(?i:goto|gosub))\b
       scope: support.function.msxbasic
 
+    # Special cases for defusr e usr
+    - match: \b(?i:def\s*usr(\d?))\b
+      captures:
+        0: keyword.control.msxbasic
+        1: constant.numeric.msxbasic
+    - match: \b(?i:usr\s*(\d?)(?=\())\b
+      captures:
+        0: support.function.msxbasic
+        1: constant.numeric.msxbasic
+
     # Instructions (several are position and context sensitive)
     # review: base key play strig stick pdl pad time date set...
     # catching 'key' if after ^ or : unless folowed by (
-    - match: \b(?i:\_(adjust|pause|pcmplay|pcmrec)|as(?=\s*#|\s*\w+\$)|auto|beep|bload|bsave|(call)(\sadjust|\spause|\spcmplay|\spcmrec|\b)|circle|clear|cload|close|cls|cmd|color|cont|copy|copy|csave|csrlin|data|(def)(dbl|(?=\s?fn)|int|sng|str|\s?usr)|delete|dim|draw|dsko\$|else|end|erase|error|field|files|for|get|gosub|goto|if|input(?!\$)|interval|ipl|kanji|key(?!(\()| +\()|kill|let|line|list|llist|load|locate|lprint|lset|maxfiles|merge|motor|name|new|next|off|on|open|out|paint|play(?!(\()| +\()|point|poke|preset|print|pset|put|read|renum|restore|resume|return|rset|run|save|screen|(set)(\sadjust|\sbeep|\spage|\spassword|\sprompt|\sscreen|\sscroll|\stitle|\svideo|\b)|sound|sprite\$|sprite|step|stop|swap|then|to|troff|tron|using|vpoke|wait|width)\b
+    - match: \b(?i:\_(adjust|pause|pcmplay|pcmrec)|as(?=\s*#|\s*\w+\$)|auto|beep|bload|bsave|(call)(\sadjust|\spause|\spcmplay|\spcmrec|\b)|circle|clear|cload|close|cls|cmd|color|cont|copy|copy|csave|csrlin|data|(def)(dbl|(?=\s?fn)|int|sng|str)|delete|dim|draw|dsko\$|else|end|erase|error|field|files|for|get|gosub|goto|if|input(?!\$)|interval|ipl|kanji|key(?!(\()| +\()|kill|let|line|list|llist|load|locate|lprint|lset|maxfiles|merge|motor|name|new|next|off|on|open|out|paint|play(?!(\()| +\()|point|poke|preset|print|pset|put|read|renum|restore|resume|return|rset|run|save|screen|(set)(\sadjust|\sbeep|\spage|\spassword|\sprompt|\sscreen|\sscroll|\stitle|\svideo|\b)|sound|sprite\$|sprite|step|stop|swap|then|to|troff|tron|using|vpoke|wait|width)\b
       scope: keyword.control.msxbasic
 
     # ? do not work with the \b on the instrunctions match
@@ -75,7 +89,7 @@ contexts:
 
     # Functions no $ (several are position and context sensitive)
     # review: base key play strig stick pdl pad time date set...
-    - match: \b(?i:abs|asc|atn|base|cdbl|cdbl|cint|cint|cos|csng|csng|cvd|cvi|cvs|date|dskf|eof|erl|err|exp|fix|fn|fpos|fre|inp|instr|int|key(?=(\(|\s+\())|len|loc|lof|log|lpos|pad|pdl|peek|play(?=(\(|\s+\())|pos|rnd|sgn|sin|spc|sqr|stick|strig|tab|tan|time|usr|val|varptr|varptr|vdp|vpeek)\b
+    - match: \b(?i:abs|asc|atn|base|cdbl|cdbl|cint|cint|cos|csng|csng|cvd|cvi|cvs|date|dskf|eof|erl|err|exp|fix|fn|fpos|fre|inp|instr|int|key(?=(\(|\s+\())|len|loc|lof|log|lpos|pad|pdl|peek|play(?=(\(|\s+\())|pos|rnd|sgn|sin|spc|sqr|stick|strig|tab|tan|time|val|varptr|varptr|vdp|vpeek)\b
       scope: support.function.msxbasic
 
     # Functions $ (several are position and context sensitive)

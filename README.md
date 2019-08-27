@@ -5,13 +5,15 @@ For Sublime Text 3
   
 >[**MSX Basic Dignified**](https://github.com/farique1/msx-basic-dignified) allows you to code MSX Basic programs using modern coding standards on your preferred editor, convert them to the old MSX Basic structure and load it into an MSX (emulated or not.)  
   
-The tools are composed of:  
+The tools are:  
 - A Syntax Highlight for the Dignified and one for the Classic version of MSX Basic.  
 - A Boxy Ocean and a Monokai based Theme with special scopes for the project.  
 - A Build System to convert and run the Dignified version and run the Classic one.  
 - A Comment Preference for the Dignified version.  
   
 To install, just clone this repo and copy all root files into an `MSX` folder inside the Sublime `Packages` folder (`~/Library/Application Support/Sublime Text 3/Packages/` on a Mac).  
+
+>**MSX Basic Dignified** and **MSX Sublime Tools** are being prepared to generate tokenized code along the ASCII one, so the ASCII Basic extension has been changed to `.asc`
   
 ## Syntax Highlight  
   
@@ -29,7 +31,7 @@ scope: source.msxbasicdignified
 `MSX Basic.sublime-syntax`  
 ```  
 name: MSX Basic  
-file_extensions: bas  
+file_extensions: [bas, asc]  
 scope: source.msxbasic  
 ```  
 One of the biggest differences is the Dignified version expects the instructions and variables to be separated by spaces and the Classic accepts them typed together (as per MSX Basic standards).  
@@ -68,7 +70,7 @@ They improve the MSX syntax highlight (Classic and Dignified) with scopes specif
 The Dignified code can be converted and run straight from Sublime using **MSX Basic Dignified** and **openMSX**.  
 The Classic code can also run from Sublime, no need for a conversion here.  
   
->The build system only works on a Mac for now, mostly due to path differences.  
+>The build system only works on a Mac for now, mostly due to path differences and the way openMSX is executed.  
   
 The builds will be available from the `Tools > Build System` menu and are called:  
   
@@ -87,41 +89,43 @@ MSX Badig Build.sublime-syntax
 ```  
   
 Before it can be used, however, some requirements  must be met:  
-- An installed copy of **openMSX**.  
-- An **openMSX** `savestate` file with the MSX booted up and disk drive capability must be made. This is necessary to speed things a little since Sublime will open a new instance of **openMSX** for each build.  
-- If coding in the Dignified version, a copy of **MSX Basic Dignified** must also be present.  
-- `MSX Badig Build.ini` must be set up with the path to **openMSX**, the `savestate` file and `msxbadig.py`.  
+- To run the code an installed copy of **openMSX** with support for disk drive is needed.  
+- If coding in the Dignified version a copy of **MSX Basic Dignified** is needed.  
+- `MSX Badig Build.ini` must be set up with the path to **openMSX** and `msxbadig.py` accordingly.  
   
 `MSX Badig Build.ini`  
 ```ini  
 [DEFAULT]  
 openmsx_filepath = /<path_to>/openmsx.app  
-savestate_filepath = /<path_to>/savestate.oms  
+machine_name = [optional alternative machine name]  
+disk_ext_name = [optional disk extension]  
 msxbadig_filepath = /<path_to>/msxbadig.py  
 ```  
 To run the build just press CTRL-B on Sublime.  
-*Convert and Run* an *Convert Only* can be toggled by pressing CTRL-SHIFT-B on a Dignified code. There is no need for a conversion on the Classic code so it will always just *Run*.  
+*Convert and Run* and *Convert Only* can be toggled by pressing CTRL-SHIFT-B when using the Dignified code. There is no need for a conversion on the Classic code so it will always just *Run*.  
   
 The build will convert the Dignified code using the default settings of **MSX Basic Dignified**, these can be configured in its own `.ini` file.  
-By default the converted Classic code will be saved on the same path as the Dignified code with its name truncated to the first 8 characters and a `.bas` extension.  
-**openMSX** will then be opened with *throttle on*, load the `savestate`, mount the converted file folder as a disk and a `RUN "<converted_file>"+RETURN` command will be sent.  
+By default the converted Classic code will be saved on the same path as the Dignified code with its name truncated to the first 8 characters and a `.asc` extension.  
+**openMSX** will then be opened with *throttle on*, mount the folder to save the converted file as a disk and a `RUN "<converted_file>"+RETURN` command will be sent.  
 Every build command will open a new instance of **openMSX**.  
   
 Some of those options can be configured with *REM tags* on the Dignified code itself, just add the needed lines anywhere.  
->They can be toggled off just by adding another `#` at the start of each line.  
+>They can be toggled off just by changing the `##BB:` prefix and will override the default settings.  
 ```ini  
 ##BB:export_path=/<path_where_to_save_the_converted_file>/  
 ##BB:export_file=<the_converted_file>  
 ##BB:convert_only=<True/False>  
 ##BB:throttle=<True/False>  
 ##BB:arguments=<msx_basic_dignified_command_line_arguments>  
+##BB:override_machine=[optional alternate machine name]  
+##BB:override_extension=[optional disk extension[:SlotB]]  
 ```  
 
 `##BB:export_path=`  
 The path where the converted code should be saved. This path will be mounted as a drive on **openMSX**.  
   
 `##BB:export_file=`  
-The name of the converted file. Better with an 8 character name and a `.bas` extension.  
+The name of the converted file. Better with an 8 character name and a `.asc` extension.  
   
 `##BB:convert_only=`  
 `True` or `False`. If true will only convert the code, otherwise will convert and run. Overrides the Sublime build settings.  
@@ -131,7 +135,13 @@ The name of the converted file. Better with an 8 character name and a `.bas` ext
   
 `##BB:arguments=`  
 Pass conversion arguments overriding the defaults and the `.ini` file on **MSX Basic Dignified**. The arguments are the same as the ones used on the command line and must be separated by commas.  
+
+`##BB:override_machine=`  
+The name of a machine that will be used instead of the default one.   
   
+`##BB:override_extension=`  
+The name of a disk drive extension in case the current machine does not support one. Will be inserted on the Slot A by default, can be inserted in Slot B by using `:SlotB` at the end. 
+
 Sublime will display the build output on the console and highlight warnings and errors.  
   
 ## Comment Preference  
@@ -145,7 +155,7 @@ There is no block comment but all lines selected will be commented.
 There is no Classic comment preference as I couldn't find a way to insert the `REM` or `'` after the line number.  
   
   
-## Acknowledgements  
+## Acknowledgments  
   
 As always, all of this is offered as is, with no guaranties whatsoever. Use at your own discretion.  
 Having said that, enjoy and send feedback.  
