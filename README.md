@@ -13,7 +13,7 @@ The tools are:
   
 To install, just clone this repo and copy all root files into an `MSX` folder inside the Sublime `Packages` folder (`~/Library/Application Support/Sublime Text 3/Packages/` on a Mac).  
 
->**MSX Basic Dignified** and **MSX Sublime Tools** are being prepared to generate tokenized code along the ASCII one, so the ASCII Basic extension has been changed to `.asc`
+>**MSX Basic Dignified** and **MSX Sublime Tools** are being prepared to generate tokenized code along with the ASCII one, so the ASCII Basic extension has been changed to `.asc`
   
 ## Syntax Highlight  
   
@@ -70,7 +70,7 @@ They improve the MSX syntax highlight (Classic and Dignified) with scopes specif
 The Dignified code can be converted and run straight from Sublime using **MSX Basic Dignified** and **openMSX**.  
 The Classic code can also run from Sublime, no need for a conversion here.  
   
->The build system only works on a Mac for now, mostly due to path differences and the way openMSX is executed.  
+>The build system only works on a Mac for now, mostly due to path differences and the way **openMSX** is executed.  
   
 The builds will be available from the `Tools > Build System` menu and are called:  
   
@@ -89,7 +89,7 @@ MSX Badig Build.sublime-syntax
 ```  
   
 Before it can be used, however, some requirements  must be met:  
-- To run the code an installed copy of **openMSX** with support for disk drive is needed.  
+- To run the code, an installed copy of **openMSX** with support for disk drive is needed.  
 - If coding in the Dignified version a copy of **MSX Basic Dignified** is needed.  
 - `MSX Badig Build.ini` must be set up with the path to **openMSX** and `msxbadig.py` accordingly.  
   
@@ -106,7 +106,7 @@ To run the build just press CTRL-B on Sublime.
   
 The build will convert the Dignified code using the default settings of **MSX Basic Dignified**, these can be configured in its own `.ini` file.  
 By default the converted Classic code will be saved on the same path as the Dignified code with its name truncated to the first 8 characters and a `.asc` extension.  
-**openMSX** will then be opened with *throttle on*, mount the folder to save the converted file as a disk and a `RUN "<converted_file>"+RETURN` command will be sent.  
+**openMSX** will then be opened with *throttle on*, mount the folder as a disk to save the converted file and a `RUN "<converted_file>"+RETURN` command will be sent.  
 Every build command will open a new instance of **openMSX**.  
   
 Some of those options can be configured with *REM tags* on the Dignified code itself, just add the needed lines anywhere.  
