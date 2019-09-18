@@ -18,7 +18,7 @@
 - Improved CALL and subsequent 15 char string  
 - Improved DEFUSR e USR() highlight word and number, i.e.: DEFUSR1  
 - Improved DATA ## and _ handling  
-- fixed instructions highlighting inside variable name  
+- Fixed instructions highlighting inside variable name  
 
 ## **v1.1**  
 - Not registered.  
