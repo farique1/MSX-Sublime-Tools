@@ -31,14 +31,14 @@ scope: source.msxbasicdignified
 `MSX Basic.sublime-syntax`  
 ```  
 name: MSX Basic  
-file_extensions: [bas, asc]  
+file_extensions: [bas, asc, mlt]  
 scope: source.msxbasic  
 ```  
 One of the biggest differences is the Dignified version expects the instructions and variables to be separated by spaces and the Classic accepts them typed together (as per MSX Basic standards).  
-The Classic version also has all the Dignified specifics removed for simplicity but maintains useful ones like the labels highlight on its `REM` lines.  
+The Classic version also has all the Dignified specifics removed for simplicity but maintains useful ones like the labels highlight on its `REM` lines and supports the [**MSX Basic Tokenizer**](https://github.com/farique1/MSX-Basic-Tokenizer) `.mtl` List format.  
   
 Here is a preview of them side by side:  
-![# Versions](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Versions.png)  
+![# Versions](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Versions.jpg)  
   
 And here are some specifics of the Dignified version:  
 ![# Highlights](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Highlights.png)  
@@ -109,8 +109,8 @@ By default the converted Classic code will be saved on the same path as the Dign
 **openMSX** will then be opened with *throttle on*, mount the folder as a disk to save the converted file and a `RUN "<converted_file>"+RETURN` command will be sent.  
 Every build command will open a new instance of **openMSX**.  
   
-Some of those options can be configured with *REM tags* on the Dignified code itself, just add the needed lines anywhere.  
->They can be toggled off just by changing the `##BB:` prefix and will override the default settings.  
+Some of those options can be configured with *REM tags* on the Dignified code itself, just add the needed lines anywhere and they will override the default settings.  
+>They can be toggled off just by changing the `##BB:` prefix (to `## BB:` for instance.)  
 ```ini  
 ##BB:export_path=/<path_where_to_save_the_converted_file>/  
 ##BB:export_file=<the_converted_file>  

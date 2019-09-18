@@ -1,17 +1,40 @@
 %YAML 1.2
 ---
 # See http://www.sublimetext.com/docs/3/syntax.html
+#
+# Added &O
+# Added OUTPUT
+# Added AS
+# Added operator scope to &H &O &B with
+# Added operator scope to variable and numeric types $%!# and preceding #
+# Added .asc extension
+# Added .mlt extension (List file for the MSX Basic Tokenizer)
+# Added support for Tokenizer's List syntax
+# Added support for scientific notation
+# Added Support for <= and >= ligatures
+# Improved CALL and subsequent 15 char string
+# Improved DEFUSR e USR() highlight word and number, i.e.: DEFUSR1
+# Fixed highlight KEY as instruction after line numbers
+
 author: Fred Rique (farique)
 url: https://github.com/farique1/MSX-Sublime-Tools
-comment: v1.1
+comment: v1.2
 
 name: MSX Basic
-file_extensions: [bas, asc]
+file_extensions: [bas, asc, mlt]
 scope: source.msxbasic
 
 # All case insensitive
 contexts:
   main:
+    # Token List specific
+    - match: '((^[0-9a-fA-F]{4})(:)([0-9a-fA-F ]+ {8})|^)(start|end|lines|size|)'
+      captures:
+        2: support.function.msxbasic
+        3: constant.global.msxbasic
+        4: constant.numeric.msxbasic
+        5: variable.parameter.msxbasic
+
     # Double quotes
     - match: '"'
       push: double_quoted_string
@@ -38,13 +61,19 @@ contexts:
     # Instructions (several are position and context sensitive)
     # review: base key play strig stick pdl pad time date set...
     # catching 'key' if after ^ or : unless folowed by (
-    - match: (?i:\_(\w+)|\?|as(?=\s*#|\s*\w+\$)|auto|beep|bload|bsave|(call)(\sadjust|\spause|\spcmplay|\spcmrec|\b)|circle|clear|cload|close|cls|cmd|color|cont|copy|copy|csave|csrlin|data|(def)(dbl|(?=\s?fn)|int|sng|str|\s?usr)|delete|dim|draw|dsko\$|else|end|erase|error|field|files|for|get|gosub|goto|if|input|interval|ipl|kanji|(?<=:|^)\s*key(?!\()|kill|let|line|list|llist|load|locate|lprint|lset|maxfiles|merge|motor|name|new|next|off|on|open|out|paint|play(?!(\()| +\()|point|poke|preset|print|pset|put|read|renum|restore|resume|return|rset|run|run|save|screen|(set)(\sadjust|\sbeep|\spage|\spassword|\sprompt|\sscreen|\sscroll|\stitle|\svideo|\b)|sound|sprite\$|sprite|step|stop|swap|then|to|troff|tron|using|vpoke|wait|width)
+    - match: (?i:\?|as(?=\s*#|\s*\w+\$)|auto|as|beep|bload|bsave|circle|clear|cload|close|cls|cmd|color|cont|copy|copy|csave|csrlin|data|(def)(dbl|(?=\s?fn)|int|sng|str|\s?usr)|delete|dim|draw|dsko\$|else|end|erase|error|field|files|for|get|gosub|goto|if|input|interval|ipl|kanji|(?<=:|^|\d)\s*key(?!\()|kill|let|line|list|llist|load|locate|lprint|lset|maxfiles|merge|motor|name|new|next|off|on|open|out|output|paint|play(?!(\()| +\()|point|poke|preset|print|pset|put|read|renum|restore|resume|return|rset|run|run|save|screen|(set)(\sadjust|\sbeep|\spage|\spassword|\sprompt|\sscreen|\sscroll|\stitle|\svideo|\b)|sound|sprite\$|sprite|step|stop|swap|then|to|troff|tron|using|vpoke|wait|width)
       scope: keyword.control.msxbasiccomment.msxbasic
 
     # Functions (several are position and context sensitive)
     # review: base key play strig stick pdl pad time date set...
     - match: (?i:abs|asc|atn|attr\$|base|bin\$|cdbl|cdbl|chr\$|cint|cint|cos|csng|csng|cvd|cvi|cvs|date|dskf|eof|erl|err|exp|fix|fn|fpos|fre|hex\$|inkey\$|inp|input\$|instr|int|key|left\$|len|loc|lof|log|lpos|mid\$|mkd\$|mki\$|mks\$|oct\$|pad|pdl|peek|play(?=(\(|\s+\())|pos|right\$|rnd|sgn|sin|space\$|spc|sqr|stick|str\$|strig|string\$|tab|tan|time|usr|val|varptr|varptr|vdp|vpeek)
       scope: support.function.msxbasic
+
+   # Call and _ get any 15 char string.
+    - match: (call\s+|_\s*)(\w{,15})
+      captures:
+        1: keyword.control.msxbasic
+        2: support.function.msxbasic
 
     # colon - instruction separator
     - match: ':'
@@ -59,18 +88,30 @@ contexts:
       scope: keyword.operator.msxbasic
 
     # Numbers
-    - match: ([1-9]+[0-9]*|0)
-      scope: constant.numeric.msxbasic
+    - match: '(#?)([1-9]+[0-9]*|0)(\.?)([ed][+-])?([%!#]?)'
+      captures:
+        1: keyword.operator.msxbasic
+        2: constant.numeric.msxbasic
+        3: keyword.operator.msxbasic
+        4: keyword.operator.msxbasic
+        5: keyword.operator.msxbasic
 
     # Variables
-    - match: '[A-Za-z]\d'
-      scope: constant.global.msxbasic
+    - match: '(#?)([A-Za-z]\d*)([%!#\$]?)'
+      captures:
+        1: keyword.operator.msxbasic
+        2: constant.global.msxbasic
+        3: keyword.operator.msxbasic
 
     # Hex and binary numbers (bug if word after hex touching and beggining with a-f)
-    - match: '(&[hH])([0-9a-fA-F]+|)|(&[bB])([01]+|)'
+    - match: '(&[hH])([0-9a-fA-F]+|)|(&[bB])([01]+|)|(&[oO])([1-7]+|)'
       captures:
+        1: keyword.operator.msxbasic
         2: constant.numeric.msxbasic
+        3: keyword.operator.msxbasic
         4: constant.numeric.msxbasic
+        5: keyword.operator.msxbasic
+        6: constant.numeric.msxbasic
 
     # Quotes: show join line character _
   double_quoted_string:
