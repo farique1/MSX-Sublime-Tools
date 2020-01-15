@@ -298,7 +298,7 @@ return
 
 		{keys_page_end}
 		[?@]13,19 "      VMVMore Keys"
-		[?@]13,21 "ABBBBBBBB _
+		[?@]13,21 "ABBBBBBBB_
 				   BBBBBBBBC"
 
 		.end_scan()
