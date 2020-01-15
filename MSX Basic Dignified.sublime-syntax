@@ -2,27 +2,15 @@
 ---
 # See http://www.sublimetext.com/docs/3/syntax.html
 #
-# Added &O
-# Added OUTPUT
-# Added AS
-# Added True and False
-# Added INCLUDE
-# Added support for scientific notation
-# Added operator scope to &H &O &B with
-# Added operator scope to variable and numeric types $%!# and preceding #
-# Improved DECLARE with new long var rules
-# Improved DECLARE must be followed by space, DEFINE don't
-# Improved Dignified commands highlight
-# Improved Highlight for the build settings tags (##BB:)
-# Improved exclusive comment (##) separating from ' and REM.
-# Improved CALL and subsequent 15 char string
-# Improved DEFUSR e USR() highlight word and number, i.e.: DEFUSR1
-# Improved DATA ## and _ handling
-# fixed instructions highlighting inside variable name
+# See https://github.com/farique1/MSX-Sublime-Tools
+# for updates and other MSX Sublime tools
+#
+# Added FUNC proto-function definition and calling
+# Added FN function name highlight
 
 author: Fred Rique (farique)
 url: https://github.com/farique1/MSX-Sublime-Tools
-comment: v1.2
+comment: v1.3
 
 name: MSX Basic Dignified
 file_extensions: bad
@@ -47,7 +35,7 @@ contexts:
         4: entity.name.class.line.msxbasic
 
     # Comment ##
-    - match: '(^|\s)##.*\n'
+    - match: '(^|\s*)##.*\n'
       scope: comment.msxbasic
 
     # Comment line ' and REM
@@ -164,6 +152,14 @@ contexts:
         0: support.function.msxbasic
         1: constant.numeric.msxbasic
 
+    #def fn
+    - match: \b(?i:(fn)\s+(~?)(\w+)(\$|\%|\!|\#)?(?=\())
+      captures:
+        1: support.function.msxbasic
+        2: keyword.operator.msxbasic
+        3: support.function.msxbasic
+        4: keyword.operator.msxbasic
+
     # Instructions (several are position and context sensitive)
     # review: base key play strig stick pdl pad time date set...
     # catching 'key' if after ^ or : unless followed by (
@@ -201,6 +197,14 @@ contexts:
     # Endif if not alone nor on rem, quote, data
     - match: (?i:endif)
       scope: invalid.deprecated.msxbasic
+
+    # function definition
+    - match: (?i:)(^\s*func\s+)
+      scope: entity.name.tag.msxbasic
+
+    # function name
+    - match: (?i:)(\.\w+)(?=\()
+      scope: entity.name.class.line.msxbasic
 
     # colon - instruction separator
     - match: ':'

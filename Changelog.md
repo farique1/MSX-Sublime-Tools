@@ -1,4 +1,10 @@
 # MSX Basic Dignified.sublime-syntax
+## **v1.3**  
+
+***14-1-2020***   
+- Added FUNC proto-function definition and calling
+- Added FN function name highlight
+
 ## **v1.2**  
 
 ***18-9-2019***   
@@ -29,6 +35,12 @@
 
 
 # MSX Basic.sublime-syntax
+## **v1.3**  
+
+***14-1-2020*** 
+- Added FN function name highlight
+- Fixed ASC being superseeded by AS
+
 ## **v1.2**  
 
 ***18-9-2019***  
