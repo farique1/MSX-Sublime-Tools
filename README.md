@@ -1,24 +1,188 @@
 # MSX Sublime Tools  
-For Sublime Text 3  
+**v1.4**  
+For **Sublime Text 3**  
   
-**MSX Sublime Tools** was created to improve the experience of the **MSX Basic Dignified** project but also helps the creation of regular **MSX Basic** programs.  
+**MSX Sublime Tools** are a set of tools developed for Sublime Text 3 created to improve the experience of working with **MSX Basic Dignified** and regular **MSX Basic** programs.  
   
->[**MSX Basic Dignified**](https://github.com/farique1/msx-basic-dignified) allows you to code MSX Basic programs using modern coding standards on your preferred editor, convert them to the old MSX Basic structure and load it into an MSX (emulated or not.)  
+>[**MSX Basic Dignified**](https://github.com/farique1/msx-basic-dignified) is a 'dialect' of MSX Basic using modern coding style and standards that can be composed on any text editor and converted to the traditional MSX Basic to be executed.  
   
 The tools are:  
-- A Syntax Highlight for the Dignified and one for the Classic version of MSX Basic.  
-- A Boxy Ocean and a Monokai based Theme with special scopes for the project.  
-- A Build System to convert and run the Dignified version and run the Classic one.  
-- A Comment Preference for the Dignified version.  
+- A **Build System** for the Dignified and traditional versions of MSX Basic with conversion, tokenization and execution monitoring capabilities.  
+- **Syntax Highlight**s for the Dignified and traditional versions of MSX Basic.  
+- **Theme**s based on Boxy Ocean and Monokai with special scopes for both Basic versions.  
+- A **Theme** simulating the blue MSX 1 screen and accompanying MSX Screen 0 font.  
+- **Snippets** for the Dignified version of MSX Basic.  
+- A **Comment Preference** for the Dignified version.  
   
 To install, just clone this repo and copy all root files into an `MSX` folder inside the Sublime `Packages` folder (`~/Library/Application Support/Sublime Text 3/Packages/` on a Mac).  
-
->**MSX Basic Dignified** and **MSX Sublime Tools** are being prepared to generate tokenized code along with the ASCII one, so the ASCII Basic extension has been changed to `.asc`
+  
+The Dignified Basic version uses a `.bad` extension and the traditional ASCII Basic an `.asc` one.  
+  
+## Build System  
+  
+The Dignified code can be converted, tokenized and run straight from Sublime using **MSX Basic Dignified**, **openMSX** and one of the **MSX Basic Toknizer**s. It can also have its execution monitored for Basic errors and have the offending Dignified lines tagged back on Sublime.  
+Traditional MSX Basic can also be tokenized and run from Sublime, no monitoring here unfortunately.  
+A list file similar to the ones exported by assemblers with the tokens alongside the ASCII code and some statistics can also be exported (see an eaxample at [**MSX Basic Tokenizer**](https://github.com/farique1/MSX-Basic-Tokenizer)).  
+Sublime will display the build output on the console and highlight warnings and errors.  
+  
+>When using **openMSX** to execute or monitor the code be aware that the saving folder will be mounted on the MSX as a disk and all constrains of that filesystem apply including file size, name size, lack of spaces on the names, etc. (the build system will try to mitigate some of these but caution is the better approach.)  
+  
+>The build system only works on a Mac for now mostly due to path differences and the way **openMSX** is executed.  
+  
+The build system is composed of the following files:  
+```  
+MSX Badig Build.py  
+MSX Badig Build.ini  
+MSX Badig Build.sublime-syntax  
+MSX Basic Dignified.sublime-build  
+MSX Basic.sublime-build  
+openMSXoutput.tcl  
+```  
+  
+Depending on what functionality is required the aforementioned programs need to be installed:  
+  
+- If coding in the Dignified flavour, a copy of **MSX Basic Dignified** is needed.  
+- **MSX Basic Tokenizer** or **openMSX Basic (de)Tokenizer** are needed for tokenized output and list export.  
+- To run and monitor the program execution, an installed copy of **openMSX** with a machine supporting disk drive is needed.  
+  
+The path to these programs can be set up on the code itself or on `MSX Badig Build.ini`.  The deafault behaviour of the build system in addition to these can also be setup on ***REM tags*** on the Dignified code. Each setup method have a priority higher than the one before.  
+  
+### Seting up  
+  
+**`MSX Badig Build.ini`**  
+  
+The only configuration necessary on the `.ini` file are the paths to the support programs being used and any modification to the default behaviour of the build system. All other settings can be left blank.  
+  
+```ini  
+[DEFAULT]  
+msxbadig_filepath = [/path_to/msxbadig.py]  
+batoken_filepath = [/path_to/msxbatoken.py]  
+openbatoken_filepath = [/path_to/openmsxbatoken.py]  
+openmsx_filepath = [/path_to/openmsx.app]  
+machine_name = [optional alternative machine name]  
+disk_ext_name = [optional disk extension]  
+monitor_exec = [true,false]  
+throttle = [true,false]  
+tokenize = [true,false]  
+tokenize_tool = [b,o]  
+tokenize_stop = [true,false]  
+verbose_level = [#]  
+```  
+  
+`msxbadig_filepath = `  
+The path to **MSX Basic Dignified**  
+  
+`batoken_filepath = `  
+The path to **MSX Basic Tokenizer**  
+  
+`openbatoken_filepath = `  
+The path to **openMSX Basic (de)Tokenizer**  
+  
+`openmsx_filepath = `  
+The path to **openMSX**  
+  
+`machine_name =` Default: none (run **openMSX** with the default machine)  
+The name of a machine that will be used instead of the default one on **openMSX**.  
+  
+`disk_ext_name =` Default: none (no disk extension are loaded)  
+The name of a disk drive extension in case the selected machine does have a disk drive. Will be inserted on the *Slot A* by default, can be inserted in *Slot B* by using `:SlotB` at the end.  
+  
+`monitor_exec =` `true` or `false` Default: `true`  
+Enable or disable the execution monitoring of the code on **openMSX** after conversion. The monitoring catch errors in Basic and tag the offending Dignified line on Sublime.  
+  
+`throttle =` `true` or `false` Default: `false`  
+Force **openMSX** to open with or without *throttle* activated.  
+  
+`tokenize =` `true` or `false` Default: `true`  
+Enable or disable saving a tokenized version of the code.  
+  
+`tokenize_tool =` `b` or `o` Default: `b`  
+The program used to tokenize the code.  
+`b` = **MSX Basic Tokenizer**  
+`o` = **openMSX Basic (de)Tokenizer**  
+  
+`tokenize_stop =` `true` or `false` Default: `true`  
+If `true` will stop the build on tokenization errors. If `false` will try to continue the build process with the ASCII version of the code (the ASCII version is always saved before tokenization).  
+  
+`verbose_level =` `#` Default: `3`  
+Set the level of feedback given. Will cascade down to the support programs.  
+`0` show nothing, `1` errors, `2` errors and warnings, `3` errors, warnings and steps and `4` errors, warnings, steps and details.  
+  
+***REM tags***  
+  
+Each support program have its own configurations that can be changed on their installation and `.ini` files. Some of these, however, can be forced using *REM tags* on the Dignified code itself, just add the needed lines anywhere. The *REM tags* will override all other settings including the build variant ones.  
+  
+```ini  
+##BB:export_file=<the_converted_file>  
+##BB:export_path=<path_where_to_save_the_converted_file>  
+##BB:override_machine=<optional alternate machine name>  
+##BB:override_extension=<optional disk extension[:SlotB]>  
+##BB:monitor_exec=<true,false>  
+##BB:throttle=<true,false>  
+##BB:convert_only=<true,false>  
+##BB:arguments=<msx_basic_dignified_command_line_arguments>  
+```  
+  
+>There is no need to delete a line of REM tag when not using it. They can be toggled off just by changing the `##BB:` prefix (to `## BB:` for instance.)  
+  
+`##BB:export_file=`  
+The name of the converted ASCII file, better with an 8 character name and a `.asc` extension to conform with the standards. The tokenized version will have a `.bas` extension.  
+  
+`##BB:export_path=`  
+The path where the converted code should be saved. This path will be mounted as a drive on **openMSX** so be careful.  
+  
+`##BB:override_machine=`  
+`##BB:override_extension=`  
+`##BB:monitor_exec=`  
+`##BB:throttle=`  
+The same as on the `MSX Badig Build.ini`.  
+  
+`##BB:convert_only=`  
+`true` or `false`. If true will only convert the code otherwise will convert and run.  
+  
+`##BB:arguments=`  
+Pass arguments to **MSX Basic Dignified**, they are the same as the ones used on the command line and must be separated by commas.  
+Arguments can be used here to complement the *REM tags*.  
+They can force the use of one or the other tokenization program: `-tt <b,o>` works the same way as on the `.ini`'s `tokenize_tool`.  
+Dictate if a tokenized, ASCII or both versions should be saved: `-of <t,a,b>` tells the build system to export a tokenized, an ASCII or both versions respectively.  
+ Or if a `.mlt` list file should be exported: `-el [#]` export a list file (for more information see **MSX Basic Tokenizer** or **MSX Basic Dignified**)  
+  
+> The *REM tags* can be automatically created by typing `remtags` and pressing TAB on a MSX Basic Dignified syntax page.  
+  
+### Building  
+  
+The builds are available from the `Tools > Build System` menu and are called:  
+  
+`MSX Basic`  
+`MSX Basic Dignified`  
+  
+The build type can be left on `automatic` when using syntax scopes and the extensions of the Basic flavours, Sublime will choose and use the correct one.  
+To run the build just press COMMAND-B on Sublime.  
+  
+When building the Dignified version, by default, the converted traditional code will be saved on the same path as the Dignified one with its name truncated to the first 8 characters and a `.asc` extension. A tokenized version will also be saved with a `.bas` extension. **openMSX** will then be opened, mount this folder as a disk and run the `.bas` tokenized version. If no tokenized version was saved, the ASCII `.asc` version will be chosen instead. The execution of the code will then be monitored on **openMSX** and Basic errors will be reported back to Sublime and the correct line will be tagged. A program *Break* will also be reported and direct command errors will generate warnings.  
+  
+> When using `on error` to catch and customize errors on MSX Basic, always use a `CHR$(7)` (*BEEP*) character and pass the line number as the last text on the error message to make sure the monitoring algorithm will catch and parse the error and its location correctly.  
+  
+Each of the builds have some variants that can be chosen by pressing COMMAND-SHIFT-B.  
+Once they are chosen they will be used as the default COMMAND-B build until Sublime is closed or another variant is chosen. They are:  
+  
+- MSX Basic Dignified:  
+`Default`: Will convert, tokenize, run and monitor the Dignified code.  
+`Don't monitor`: Will convert, tokenize and run (but not monitor) the Dignified code.  
+`Convert only`: Will convert and tokenize (but not run nor monitor) the Dignified code.  
+  
+- MSX Basic:  
+`Default`: Will only run the traditional Basic code.  
+`Tokenize only`: Will only tokenize the traditional Basic code.  
+`Tokenize and save list`: Will tokenize the traditional Basic code and save a `.mlt` list file.  
+`Tokenize and run`: Will tokenize and run the traditional Basic code.  
+  
+Arguments passed in `MSX Badig Build.ini` or on *REM tags* will override the default behaviour of the chosen build variant.  
+Every build command will open a new instance of **openMSX**.  
   
 ## Syntax Highlight  
   
-Two pretty decent syntax highlights, one for the Dignified version and one for the Classic version of MSX Basic.  
-- The Dignified characteristics:  
+Two pretty decent syntax highlights, one for the Dignified version and one for the Classic version of MSX Basic are available.  
   
 `MSX Basic Dignified.sublime-syntax`  
 ```  
@@ -26,8 +190,7 @@ name: MSX Basic Dignified
 file_extensions: bad  
 scope: source.msxbasicdignified  
 ```  
-- The Classic characteristics:  
-  
+###  
 `MSX Basic.sublime-syntax`  
 ```  
 name: MSX Basic  
@@ -37,10 +200,10 @@ scope: source.msxbasic
 One of the biggest differences is the Dignified version expects the instructions and variables to be separated by spaces and the Classic accepts them typed together (as per MSX Basic standards).  
 The Classic version also has all the Dignified specifics removed for simplicity but maintains useful ones like the labels highlight on its `REM` lines and supports the [**MSX Basic Tokenizer**](https://github.com/farique1/MSX-Basic-Tokenizer) `.mtl` List format.  
   
-Here is a preview of them side by side:  
+Both versions side by side:  
 ![# Versions](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Versions.jpg)  
   
-And here are some specifics of the Dignified version:  
+Specifics of the Dignified version:  
 ![# Highlights](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/Highlights.png)  
   
   
@@ -50,8 +213,8 @@ And here are some specifics of the Dignified version:
   
 MSX Basic Dignified still has issues on some fringe cases so the syntax highlight will try to point some of these potential problems as well as some irregularities that are taken care by the conversion.  
   
-4. Leading line numbers are issued automatically so they should not be on the Dignified code; they will be removed automatically with a warning. However numbers beginning a broken `REM` line after a `:` are improperly removed. Both cases are highlighted as a warning.  
-5. `ENDIF`s alone on a line are automatically removed on the conversion. However `ENDIF` commands not alone are not removed (will generate a warning) and `ENDIF`s that are part of another command but are alone due to an line break (`_`) are improperly removed. Both cases are highlighted as a warning.  
+4. Leading line numbers are issued automatically so they should not be on the Dignified code; they will be removed automatically with a warning. Numbers beginning a broken `REM` line after a `:`, however, are improperly removed. Both cases are highlighted as a warning.  
+5. `ENDIF`s alone on a line are automatically removed on the conversion.  `ENDIF` commands not alone are not removed (will generate a warning) and `ENDIF`s that are part of another command but are alone due to an line break (`_`) are improperly removed. Both cases are highlighted as a warning.  
 6. Errors that stop the execution of the conversion are highlighted as errors.  
   
   
@@ -61,98 +224,39 @@ MSX Basic Dignified still has issues on some fringe cases so the syntax highligh
 A theme based on Monokai.  
   
 `MSX Boxy Ocean.tmTheme`  
-And a theme based on Boxy Ocean.  
+A theme based on Boxy Ocean.  
   
-They improve the MSX syntax highlight (Classic and Dignified) with scopes specific for the Dignified code: `define`, `declare`, labels, errors and warnings.  
+They improve the MSX syntax highlight (traditional and Dignified) with scopes specific for the Dignified code: `define`, `declare`, labels, errors and warnings.  
   
-## Build System  
+` MSX Blue.tmTheme`  
+A theme mimicking the blue MSX 1 screen.  
+also `MSX Screen 0 New.ttf`.  
+An MSX screen 0 TTF font.  
+![# MSX Blue Theme](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/BlueTheme.jpg)  
   
-The Dignified code can be converted and run straight from Sublime using **MSX Basic Dignified** and **openMSX**.  
-The Classic code can also run from Sublime, no need for a conversion here.  
+## Snippets  
+`MSX Basic Dignified.sublime-completions`  
   
->The build system only works on a Mac for now, mostly due to path differences and the way **openMSX** is executed.  
+Snippets for auto completion of:  
+ **FOR-NEXT-STEP**  
+ **IF-THEN-ELSE**  
+ **LOCATE-PRINT**  
+ **Screen initialisation**  
+ **FUNC**  
   
-The builds will be available from the `Tools > Build System` menu and are called:  
+`MSX Basic Dignified Remtags.sublime-snippet`  
   
-*MSX Badig*  
-*MSX Basic Run*  
-  
-When using the syntax scopes and extensions, Sublime will choose and use the correct one automatically.  
-  
-The build system is composed of the following files:  
-```  
-MSX Badig.sublime-build  
-MSX Basic Run.sublime-build  
-MSX Badig Build.ini  
-MSX Badig Build.py  
-MSX Badig Build.sublime-syntax  
-```  
-  
-Before it can be used, however, some requirements  must be met:  
-- To run the code, an installed copy of **openMSX** with support for disk drive is needed.  
-- If coding in the Dignified version a copy of **MSX Basic Dignified** is needed.  
-- `MSX Badig Build.ini` must be set up with the path to **openMSX** and `msxbadig.py` accordingly.  
-  
-`MSX Badig Build.ini`  
-```ini  
-[DEFAULT]  
-openmsx_filepath = /<path_to>/openmsx.app  
-machine_name = [optional alternative machine name]  
-disk_ext_name = [optional disk extension]  
-msxbadig_filepath = /<path_to>/msxbadig.py  
-```  
-To run the build just press CTRL-B on Sublime.  
-*Convert and Run* and *Convert Only* can be toggled by pressing CTRL-SHIFT-B when using the Dignified code. There is no need for a conversion on the Classic code so it will always just *Run*.  
-  
-The build will convert the Dignified code using the default settings of **MSX Basic Dignified**, these can be configured in its own `.ini` file.  
-By default the converted Classic code will be saved on the same path as the Dignified code with its name truncated to the first 8 characters and a `.asc` extension.  
-**openMSX** will then be opened with *throttle on*, mount the folder as a disk to save the converted file and a `RUN "<converted_file>"+RETURN` command will be sent.  
-Every build command will open a new instance of **openMSX**.  
-  
-Some of those options can be configured with *REM tags* on the Dignified code itself, just add the needed lines anywhere and they will override the default settings.  
->They can be toggled off just by changing the `##BB:` prefix (to `## BB:` for instance.)  
-```ini  
-##BB:export_path=/<path_where_to_save_the_converted_file>/  
-##BB:export_file=<the_converted_file>  
-##BB:convert_only=<True/False>  
-##BB:throttle=<True/False>  
-##BB:arguments=<msx_basic_dignified_command_line_arguments>  
-##BB:override_machine=[optional alternate machine name]  
-##BB:override_extension=[optional disk extension[:SlotB]]  
-```  
-
-`##BB:export_path=`  
-The path where the converted code should be saved. This path will be mounted as a drive on **openMSX**.  
-  
-`##BB:export_file=`  
-The name of the converted file. Better with an 8 character name and a `.asc` extension.  
-  
-`##BB:convert_only=`  
-`True` or `False`. If true will only convert the code, otherwise will convert and run. Overrides the Sublime build settings.  
-  
-`##BB:throttle=`  
-`True` or `False`. Force **openMSX** to open with or without *throttle on*.  
-  
-`##BB:arguments=`  
-Pass conversion arguments overriding the defaults and the `.ini` file on **MSX Basic Dignified**. The arguments are the same as the ones used on the command line and must be separated by commas.  
-
-`##BB:override_machine=`  
-The name of a machine that will be used instead of the default one.   
-  
-`##BB:override_extension=`  
-The name of a disk drive extension in case the current machine does not support one. Will be inserted on the Slot A by default, can be inserted in Slot B by using `:SlotB` at the end. 
-
-Sublime will display the build output on the console and highlight warnings and errors.  
+A snippet for the creation of the **Build System** *REM tags*.  
   
 ## Comment Preference  
   
-`MSX Comments.tmPreferences`  
+`MSX Basic Dignified Comments.tmPreferences`  
   
 Set `##` as the default comment.  
-`##` is a Dignified comment that is not converted to the Classic code.  
+`##` is a Dignified comment that is deleted when the code is converted to the traditional version.  
 There is no block comment but all lines selected will be commented.  
   
-There is no Classic comment preference as I couldn't find a way to insert the `REM` or `'` after the line number.  
+There is no Classic comment preference as I couldn't find a way to insert the `REM` or `'` AFTER the line number.  
   
   
 ## Acknowledgments  

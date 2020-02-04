@@ -5,12 +5,15 @@
 # See https://github.com/farique1/MSX-Sublime-Tools
 # for updates and other MSX Sublime tools
 #
+# v1.3.1
+#   Added ##BB:monitor_exec=
+# v1.3.0
 # Added FUNC proto-function definition and calling
 # Added FN function name highlight
 
 author: Fred Rique (farique)
 url: https://github.com/farique1/MSX-Sublime-Tools
-comment: v1.3
+comment: v1.3.1
 
 name: MSX Basic Dignified
 file_extensions: bad
@@ -27,7 +30,7 @@ contexts:
       push: double_quoted_string
 
     # Badig Build configs
-    - match: (^##BB:)(export_path|export_file|convert_only|throttle|arguments|override_machine|override_extension)(=)(.*$)
+    - match: (^##BB:)(export_path|export_file|convert_only|throttle|arguments|override_machine|override_extension|monitor_exec)(=)(.*$)
       captures:
         1: comment.msxbasic
         2: variable.parameter.msxbasic

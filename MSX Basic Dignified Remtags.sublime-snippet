@@ -1,0 +1,18 @@
+<snippet>
+	<content><![CDATA[
+## BB:export_file=${1:}
+## BB:export_path=${2:}
+## BB:override_machine=${3:}
+## BB:override_extension=${4:}
+## BB:monitor_exec=${5:True}
+## BB:throttle=${6:False}
+## BB:convert_only=${7:False}
+## BB:arguments=${8:}
+${9:## remove the space between ## and BB to activate}
+
+]]></content>
+	<tabTrigger>remtags</tabTrigger>
+	<scope>source.msxbasicdignified</scope>
+	<!-- <description>MSX Badig Build control rem tags</description> -->
+	<!-- -ls 10,-lp 10,-lz,-bc 0,-ac 0,-gs 1,-uo,-ks,-bl,-br,-ar,-sl,-ll 0,-lr s,-rr s,-cr,-ki,-ci,-si 2,-nc,-cp,-tg k,-of ta,-el 16,-vs 5,-vb 3 -->
+</snippet>

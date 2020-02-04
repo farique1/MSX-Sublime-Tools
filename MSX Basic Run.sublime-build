@@ -1,7 +1,0 @@
-{
-    "cmd": ["python", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic"],
-    "selector": "source.msxbasic",
-    "working_dir": "$project_path",
-    "file_patterns": "*.bas",
-    "syntax": "MSX Badig Build.sublime-syntax"
-} 
