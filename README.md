@@ -1,3 +1,5 @@
+<img src="https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/GitHub_SublimeTools_Logo-02.png" alt="MSX Sublime Tools" width="290" height="130">  
+
 # MSX Sublime Tools  
 **v1.4**  
 For **Sublime Text 3**  
@@ -232,6 +234,7 @@ They improve the MSX syntax highlight (traditional and Dignified) with scopes sp
 A theme mimicking the blue MSX 1 screen.  
 also `MSX Screen 0 New.ttf`.  
 An MSX screen 0 TTF font.  
+MSX Blue theme and MSX Screen 0 New font on Sublime:  
 ![# MSX Blue Theme](https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/BlueTheme.jpg)  
   
 ## Snippets  
