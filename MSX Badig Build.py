@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
 """
 MSX Badig Build
-v1.3
+v1.4
 A Sublime 3 build system to convert MSX Basic Dignified to traditional MSX Basic and run on openMSX
 or tokenize and run ASCII MSX Basic on openMSX.
 
@@ -15,31 +16,21 @@ https://github.com/farique1/MSX-Basic-Tokenizer
 
 Installation notes on the README.md
 
-New: 18-1-2020
-    Added tokenize support with the MSX Basic tokenizers
-        Default behavior now is to tokenize the code both from Dignified and traditional code
-    Added monitoring execution to catch Basic errors when running on the emulator.
-        Added -monitor arg, ##BB:monitor_exec= and monitor_exe= to the .ini to enable monitor execution.
-        Added openMSXoutput.tcl TCL script to output opsnMSX text responses.
-        Monitor execution is now the default behaviour
-    Renamed MSX Badig.sublime-build to MSX Basic Dignified.sublime-build
-        Added Don't monitor option
-    Renamed MSX Basic Run.sublime-build to MSX Basic.sublime-build
-        Added Tokenize only, Tokenize and save list and Tokenize and run options
-    Created a more comprehensive MSX Badig Build.ini with options: batoken_filepath =, openbatoken_filepath =, monitor_exec =, throttle =, tokenize =, tokenize_tool =, tokenize_stop =, verbose_level =
-    Updated all log output to the show_log function
-    Added verbose levels
-    Verbose level propagate down to called programs
-    Better argument reporting when calling MSX Basic Dignified
-    Better openMSX log parsing
-    Better general log reporting
-    Code optimizations, improvements and better error check
+New: 1.4 17-02-2020
+    Python 3.8.
+    Added correct exception to argument errors.
+    Added compatibility to the new Badig arguments.
+    Fixed bug and better handling of files with spaces and more than 8 characters.
+        Files opened on openMSX now are internally croped to 8 char and have spaces replaced with _
+        Error if conflicting file names due to disk format limitations.
+    Better subprocess call and IO handling.
+    Changed -fb to -frb.
 """
 
 import os.path
 import argparse
 import subprocess
-import ConfigParser
+import configparser
 
 msxbadig_filepath = ''      # Path to MSX Basic Dignified ('' = local path)
 batoken_filepath = ''       # Path to MSX Basic Tokenizer ('' = local path)
@@ -49,8 +40,8 @@ machine_name = ''           # openMSX machine to open, eg: 'Sharp_HB-8000_1.2' '
 disk_ext_name = ''          # openMSX extension to open, eg: 'Microsol_Disk:SlotB'
 throttle = False            # Run openMSX with throttle enabled
 show_output = True          # Show the openMSX stderr output
-monitor_exec = True         # Monitor the code execution on openMSX
-tokenize = True             # Tokenize the ASCII code
+monitor_exec = False        # Monitor the code execution on openMSX
+tokenize = False            # Tokenize the ASCII code
 tokenize_tool = 'b'         # Tool used to tokenize the ASCII code: b-MSX Basic Tokenizer(def) o-openMSX Basic Tokenizer
 tokenize_stop = True        # Stop the execution on tokenize errors (keeps the ASCII version)
 verbose_level = 3           # Show processing status: 0-silent 1-+erros 2-+warnings 3-+steps 4-+details
@@ -83,11 +74,11 @@ def show_log(line, text, level, **kwargs):
     line_num = '(' + str(line_num) + '): ' if line_num != '' else ''
 
     if verbose_level >= level:
-        print bullets[bullet] + display_file_name + line_num + text
+        print(bullets[bullet] + display_file_name + line_num + text)
 
     if bullet == 1 and not show_file:
-        print '    Execution_stoped'
-        print
+        print('    Execution_stoped')
+        print()
         raise SystemExit(0)
 
 
@@ -104,7 +95,7 @@ parser.add_argument("-list", action='store_true', help='Save a .mlt list file')
 args = parser.parse_args()
 
 export_path = args.file_path + '/'
-export_file = os.path.splitext(args.file_name)[0][0:8] + '.asc'
+export_file = os.path.splitext(args.file_name)[0] + '.asc'
 classic_basic = args.classic
 convert_only = args.convert
 monitor_exec = args.monitor
@@ -114,7 +105,7 @@ file_load = args.file_name
 
 local_path = os.path.split(os.path.abspath(__file__))[0] + '/'
 if os.path.isfile(local_path + 'MSX Badig Build.ini'):
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.sections()
     try:
         config.read(local_path + 'MSX Badig Build.ini')
@@ -130,16 +121,19 @@ if os.path.isfile(local_path + 'MSX Badig Build.ini'):
         tokenize_tool = config.get('DEFAULT', 'tokenize_tool') if config.get('DEFAULT', 'tokenize_tool') else tokenize_tool
         tokenize_stop = config.getboolean('DEFAULT', 'tokenize_stop') if config.get('DEFAULT', 'tokenize_stop') else tokenize_stop
         verbose_level = config.getint('DEFAULT', 'verbose_level') if config.get('DEFAULT', 'verbose_level') else verbose_level
-    except (ValueError, ConfigParser.NoOptionError) as e:
+    except (ValueError, configparser.NoOptionError) as e:
         show_log('', '', 1, bullet=0)
         show_log('', 'MSX Badig Build.ini: ' + str(e), 1)
 
 tokenize_tool = 'O' if tokenize_tool.upper() == 'O' else 'B'
 
 call_monitor_tcl = ''
-arg = ['-fb'] * 30
-arg[27] = '-vb=' + str(verbose_level)
-arg[26] = '-tt=' + tokenize_tool.upper()
+valid_args = ['-ls', '-lp', '-lz', '-rh', '-cs', '-gs', '-uo', '-bl', '-lg', '-sl', '-ll', '-nr', '-cr',
+              '-ki', '-nc', '-cp', '-tg', '-tr', '-of', '-el', '-tt', '-vs', '-vb', '-exe', '-frb', '-ini']
+arg_num = len(valid_args)
+arg = ['-frb'] * arg_num
+arg[arg_num - 2] = '-vb=' + str(verbose_level)
+arg[arg_num - 3] = '-tt=' + tokenize_tool.upper()
 disk_ext_slot = 'ext'
 using_machine = 'default machine'
 output = ''
@@ -148,8 +142,6 @@ arguments_line = ''
 line_chama = ''
 line_list = {}
 included_dict = {}
-valid_args = ['-ls', '-lp', '-lz', '-bc', '-ac', '-gs', '-uo', '-ks', '-bl', '-br', '-ar', '-sl', '-ll', '-lr', '-rr',
-              '-cr', '-ki', '-ci', '-si', '-nc', '-cp', '-tg', '-of', '-el', '-tt', '-vs', '-vb', '-exe', '-fb', '-ini']
 if msxbadig_filepath == '':
     msxbadig_filepath = local_path + 'MSXBadig.py'
 if batoken_filepath == '':
@@ -190,7 +182,7 @@ if not os.path.isdir(openmsx_filepath) and (not convert_only or monitor_exec):
 
 show_log('', '', 3, bullet=5)
 
-with open(args.file_path + '/' + args.file_name) as f:
+with open(args.file_path + '/' + args.file_name, encoding='latin1') as f:
     for n, line in enumerate(f):
         if line.startswith('##BB:export_path='):
             export_path = line.replace('##BB:export_path=', '').strip()
@@ -213,33 +205,40 @@ with open(args.file_path + '/' + args.file_name) as f:
             arguments = line.replace('##BB:arguments=', '').strip()
             arguments = arguments.split(',')
             for num, item in enumerate(arguments):
-                if num > 25:  # args [26], [27], [28] and [29] are reserved to -tt, -vb, -fb and -exe
+                if num > arg_num - 5:  # args [arg_num-4], [arg_num-3], [arg_num-2] and [arg_num-1] are reserved to -tt, -vb, -exe and -frb
                     break
                 item2 = item
                 item2 = item2.strip()
                 item2 = item2.replace(' ', '=')
                 if item2.split('=')[0] not in valid_args:
-                    show_log('', ''.join(['invalid_argument: ', item2]), 1)
+                    show_log('', ' '.join(['invalid_argument:', item2]), 1)
                 if item2.split('=')[0] == '-vb':
-                    verbose_level = int(item2.split('=')[1])
-                    arg[27] = item2
-                    item2 = '-fb'
+                    try:
+                        verbose_level = int(item2.split('=')[1])
+                    except IndexError:
+                        show_log('', ' '.join(['invalid_argument_value:', '-vb']), 1)
+                    arg[arg_num - 2] = item2
+                    item2 = '-frb'
                 if item2.split('=')[0] == '-tt':
-                    arg[26] = item2
-                    item2 = '-fb'
+                    try:
+                        tokenize_tool = item2.split('=')[1].upper()
+                    except IndexError:
+                        show_log('', ' '.join(['invalid_argument_value:', '-tt']), 1)
+                    arg[arg_num - 3] = item2
+                    item2 = '-frb'
                 arg[num] = item2
 
 if monitor_exec:
     if os.path.isfile(local_path + 'openMSXoutput.tcl'):
-        call_monitor_tcl = '-script "' + local_path + 'openMSXoutput.tcl" '
-        arg[29] = '-exe'
+        call_monitor_tcl = ['-script', local_path + 'openMSXoutput.tcl']
+        arg[arg_num - 1] = '-exe'
     else:
         show_log('', ''.join(['openMSXoutput.tcl_script_not_found_(monitoring_disabled)']), 2)
         monitor_exec = False
 
 if machine_name != '':
     using_machine = machine_name
-    machine_name = '-machine ' + machine_name
+    machine_name = ['-machine', machine_name]
 
 disk_ext = disk_ext_name.split(':')
 disk_ext_name = disk_ext[0].strip()
@@ -254,10 +253,9 @@ if not classic_basic:
     show_log('', ''.join(['With args ', ' '.join(args_token)]), 3, bullet=0)
     try:
         # This... thing... here? I know, I know Leave me alone!
-        chama = ['python', msxbadig_filepath, args.file_path + '/' + args.file_name, export_path + export_file,
-                 arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9], arg[10], arg[11], arg[12], arg[13], arg[14],
-                 arg[15], arg[16], arg[17], arg[18], arg[19], arg[20], arg[21], arg[22], arg[23], arg[24], arg[25], arg[26], arg[27], arg[28], arg[29]]
-        output = subprocess.check_output(chama)
+        chama = ['python3', '-u', msxbadig_filepath, args.file_path + '/' + args.file_name, export_path + export_file]
+        chama.extend(arg)
+        output = subprocess.check_output(chama, encoding='utf-8')
         for line in output:
             line_chama += line
             if line == '\n':
@@ -277,14 +275,14 @@ if not classic_basic:
                     show_log('', line_chama.rstrip(), verbose_level, bullet=0)
                 line_chama = ''
 
-    except:
+    except subprocess.CalledProcessError:
         show_log('', ''.join([args.file_name, ': (', str(arguments_line), '): argument_error']), 1)  # Exit
 
 else:
     export_path = args.file_path
     export_file = args.file_name
     if tokenize:
-        list_arg = ['-fb'] * 3
+        list_arg = ['-frb'] * 3
         list_arg[2] = '-vb=' + str(verbose_level)
         if save_list and tokenize_tool == 'B':
             list_arg[1] = '-el'
@@ -296,8 +294,8 @@ else:
         show_log('', ''.join(['To ', export_path, '/', os.path.splitext(export_file)[0] + '.bas']), 3, bullet=0)
         show_log('', ''.join(['With ', 'args ', ' '.join(args_token)]), 3, bullet=0)
         if os.path.isfile(batoken_filepath):
-            batoken = ['python', batoken_filepath, export_path + '/' + export_file, list_arg[0], list_arg[1], list_arg[2]]
-            btoutput = subprocess.check_output(batoken)
+            batoken = ['python3', '-u', batoken_filepath, export_path + '/' + export_file, list_arg[0], list_arg[1], list_arg[2]]
+            btoutput = subprocess.check_output(batoken, encoding='utf-8')
             for line in btoutput:
                 btline += line
                 if line == '\n':
@@ -325,85 +323,110 @@ if convert_only:
     raise SystemExit(0)
 
 
-def output(show_output, step):
+def output(show_output, has_input, step):
     if show_output:
-        # proc.stdin.flush()
-        log_out = proc.stdout.readline().rstrip()
+        log_out = proc.stdout.readline().rstrip() if has_input else ''
         log_out = log_out.replace('&quot;', '"')
+        log_out = log_out.replace('&apos;', "'")
         if '"nok"' in log_out or ' error: ' in log_out:
             log_out = log_out.replace('<reply result="nok">', '')
             proc.stdin.write('<command>quit</command>')
             show_log('', ''.join([step]), 3)
+            if 'invalid command name "ext' in log_out:
+                show_log('', ''.join(['Machine probably missing a slot']), 2)
             show_log('', ''.join([log_out]), 1)  # Exit
         elif '<log level="warning">' in log_out:
             log_warning = log_out.replace('<log level="warning">', '')
             log_warning = log_warning.replace('</log>', '')
             log_out = log_out.split('<log')[0]
             log_comma = '' if log_out == '' else ': '
-            show_log('', ''.join([step, log_comma, log_out]), 3)
+            if step + log_comma + log_out != '':
+                show_log('', ''.join([step, log_comma, log_out]), 3)
             show_log('', ''.join([log_warning]), 2)
+            output(show_output, True, '')
         else:
             log_out = log_out.replace('<openmsx-output>', '')
             log_out = log_out.replace('</openmsx-output>', '')
             log_out = log_out.replace('<reply result="ok">', '')
             log_out = log_out.replace('</reply>', '')
             log_comma = '' if log_out == '' else ': '
-            show_log('', ''.join([step, log_comma, log_out]), 3)
+            if step + log_comma + log_out != '':
+                show_log('', ''.join([step, log_comma, log_out]), 3)
 
 
 show_log('', 'openMSX', 3, bullet=0)
-show_log('', ''.join(['Opeening ', export_path, export_file]), 3, bullet=0)
+show_log('', ''.join(['Opeening ', export_path, '/', export_file]), 3, bullet=0)
 show_log('', ''.join(['As a ', using_machine]), 3, bullet=0)
 show_log('', ''.join(['With ', disk_ext_name, (' extension at ' + disk_ext_slot if disk_ext_name != '' else 'no extension')]), 3, bullet=0)
 show_log('', ''.join(['Throttle ', ('enabled' if throttle else 'disabled')]), 3, bullet=0)
 show_log('', '', 3, bullet=0)
 
-# openMSX <command>s like their spaces escaped
+crop_export = os.path.splitext(export_file)[0][0:8] + os.path.splitext(export_file)[1]
+crop_export = crop_export.replace(' ', '_')
+
+if tokenize_tool == 'O':
+    export_file = crop_export
+
+list_dir = os.listdir(export_path)
+list_export = [x for x in list_dir if
+               x.lower() != export_file.lower() and
+               os.path.splitext(x)[0][0:8].replace(' ', '_').lower() +
+               os.path.splitext(x)[1].replace(' ', '_').lower() ==
+               crop_export.lower()]
+if list_export:
+    show_log('', ' '.join(['MSX_disk_name_format_conflict', ', '.join(list_export), '=', export_file, '(' + crop_export + ')']), 1)  # Exit
+
 export_path = export_path.replace(' ', r'\ ')
-export_file = export_file.replace(' ', r'\ ')
 
-cmd = (openmsx_filepath + '/contents/macos/openmsx ' + call_monitor_tcl + machine_name + ' -control stdio')
-proc = subprocess.Popen([cmd], shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+cmd = [openmsx_filepath + '/contents/macos/openmsx', '-control', 'stdio']
+if machine_name != '':
+    cmd.extend(machine_name)
+if monitor_exec:
+    cmd.extend(call_monitor_tcl)
 
-output(show_output, 'openMSX initialized as ' + using_machine)
+proc = subprocess.Popen(cmd, bufsize=1, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
 
-# proc.stdin.write('<command>set renderer SDL</command>')
-# output(show_output, 'Show screen')
+endline = '\r\n'
 
-proc.stdin.write('<command>set throttle off</command>')
-output(show_output, 'Turn throttle on')
+output(show_output, True, 'openMSX initialized as ' + using_machine)
 
-proc.stdin.write('<command>debug set_watchpoint write_mem 0xfffe {[debug read "memory" 0xfffe] == 0} {set renderer SDL}</command>')
-output(show_output, 'Set render SDL watchpoint')
+# proc.stdin.write('<command>set renderer SDL</command>' + endline)
+# output(show_output, True, 'Show screen')
 
-proc.stdin.write('<command>debug set_watchpoint write_mem 0xfffe {[debug read "memory" 0xfffe] == 1} {set throttle on}</command>')
-output(show_output, 'Set throttle on watchpoint')
+proc.stdin.write('<command>set throttle off</command>' + endline)
+output(show_output, True, 'Turn throttle on')
+
+proc.stdin.write('<command>debug set_watchpoint write_mem 0xfffe {[debug read "memory" 0xfffe] == 0} {set renderer SDL}</command>' + endline)
+output(show_output, True, 'Set render SDL watchpoint')
+
+proc.stdin.write('<command>debug set_watchpoint write_mem 0xfffe {[debug read "memory" 0xfffe] == 1} {set throttle on}</command>' + endline)
+output(show_output, True, 'Set throttle on watchpoint')
 
 if disk_ext_name != '':
-    proc.stdin.write('<command>' + disk_ext_slot + ' ' + disk_ext_name + '</command>')
-    output(show_output, 'Insert disk drive extension: ' + disk_ext_name + ' at ' + disk_ext_slot)
+    proc.stdin.write('<command>' + disk_ext_slot + ' ' + disk_ext_name + '</command>' + endline)
+    output(show_output, True, 'Insert disk drive extension: ' + disk_ext_name + ' at ' + disk_ext_slot)
 
-proc.stdin.write('<command>diska insert ' + export_path + '</command>')
-output(show_output, 'insert folder as disk: ' + export_path)
+proc.stdin.write('<command>diska insert ' + export_path + '</command>' + endline)
+output(show_output, True, 'Insert folder as disk: ' + export_path)
 
-proc.stdin.write('<command>set power on</command>')
-output(show_output, 'Power on')
+proc.stdin.write('<command>set power on</command>' + endline)
+output(show_output, True, 'Power on')
 
-proc.stdin.write('<command>type_via_keybuf \\r\\r</command>')  # Disk ROM ask for date, two enter to skip
-output(show_output, 'Press return twice')
+proc.stdin.write('<command>type_via_keybuf \\r\\r</command>' + endline)  # Disk ROM ask for date, two enter to skip
+output(show_output, True, 'Press return twice')
 
-proc.stdin.write('<command>type_via_keybuf load"' + export_file + '\\r</command>')
-output(show_output, 'type load"' + export_file)
+proc.stdin.write('<command>type_via_keybuf load"' + crop_export + '\\r</command>' + endline)
+output(show_output, True, 'Type load"' + crop_export)
 
-proc.stdin.write('<command>type_via_keybuf poke-2,0\\r</command>')
-output(show_output, 'type poke to render SLD')
+proc.stdin.write('<command>type_via_keybuf poke-2,0\\r</command>' + endline)
+output(show_output, True, 'Type poke to render SLD')
 
 if not throttle:
-    proc.stdin.write('<command>type_via_keybuf poke-2,1\\r</command>')
-    output(show_output, 'type poke to turn throttle off')
+    proc.stdin.write('<command>type_via_keybuf poke-2,1\\r</command>' + endline)
+    output(show_output, True, 'Type poke to turn throttle off')
 
-proc.stdin.write('<command>type_via_keybuf cls:run\\r</command>')
-output(show_output, 'type cls and run')
+proc.stdin.write('<command>type_via_keybuf cls:run\\r</command>' + endline)
+output(show_output, True, 'Type cls and run')
 
 show_log('', '', 3, bullet=0)
 
@@ -412,6 +435,10 @@ if monitor_exec:
     show_log('', '', 3, bullet=0)
 
     for line in iter(proc.stdout.readline, b''):
+        poll = proc.poll()
+        if poll is not None:
+            print ()
+            raise SystemExit(0)
         if '\x07' in line and '\x0c' not in line:
             line_out = line.replace('\x0d', '').replace('\x07', '').rstrip()
             current_line_list = line_out.split(' ')[len(line_out.split(' ')) - 1].rstrip()
@@ -428,5 +455,5 @@ if monitor_exec:
             else:
                 show_log('', ''.join([line_out]), 2, bullet=bullet, show_file=True)
 
-    proc.wait()
+    # proc.wait()
     show_log('', '', 1, bullet=0)

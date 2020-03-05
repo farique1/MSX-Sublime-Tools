@@ -1,5 +1,5 @@
 {
-    "cmd": ["python", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-monitor"],
+    "cmd": ["python3", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-monitor"],
     "file_regex": "(?:^\\*\\*\\*\\s)(.*):\\s\\((\\d+)\\):()(.*)$",
     "selector": "source.msxbasicdignified",
     "working_dir": "$project_path",
@@ -8,9 +8,9 @@
     "variants": [
 
 	    { "name": "Don't monitor",
-	      "cmd": ["python", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name"],
+	      "cmd": ["python3", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name"],
 	    },
         { "name": "Convert only",
-          "cmd": ["python", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-convert"],
+          "cmd": ["python3", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-convert"],
         }	]
 } 

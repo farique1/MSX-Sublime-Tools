@@ -1,6 +1,19 @@
+  
 # MSX Sublime Tools  
   
 ## MSX Badig Build  
+  
+### **v1.4**  
+***17-2-2020***  
+  
+- Python 3.8.  
+- Added correct exception to argument errors.  
+- Added compatibility to the new Badig arguments.  
+- Fixed bug and better handling of files with spaces and more than 8 characters.  
+	- Files opened on openMSX now are internally croped to 8 char and have spaces replaced with `_`.  
+	- Error if conflicting file names due to disk format limitations.  
+- Better subprocess call and IO handling.  
+- Changed `-fb` to `-frb`.  
   
 ### **v1.3**  
 ***18-1-2020***  
@@ -42,6 +55,15 @@
   
 ## MSX Basic Dignified.sublime-syntax  
   
+### **v1.4**  
+***17-2-2020***  
+- Added **loop labels**.  
+- Added **line toggle**.  
+- Added `''` and `###` **comment blocks**.  
+- Changed `_` line break to allow using without space.  
+- Fixed `"` inside DATA.  
+- Fixed `##` on last line.  
+- Fixed uppercase explicit variable on DECLARE lines.  
   
 ### **v1.3.1**  
 ***20-1-2020***  
@@ -82,6 +104,10 @@
   
 ## MSX Basic.sublime-syntax  
   
+### **v1.3.1**  
+***17-2-2020***  
+- Fixed `"` inside DATA.  
+  
 ### **v1.3**  
 ***14-1-2020***  
 - Added FN function name highlight  
@@ -111,6 +137,13 @@
   
   
 ## MSX Sublime Tools misc files.  
+  
+### **v1.5**  
+***17-2-2020***  
+- Python 3.8.  
+	Changed files:  
+	- `MSX Basic Dignified.sublime-build`  
+	- `MSX Basic.sublime-build`  
   
 ### **v1.4**  
 ***23-1-2020***  

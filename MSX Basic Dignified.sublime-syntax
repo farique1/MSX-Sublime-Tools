@@ -5,15 +5,18 @@
 # See https://github.com/farique1/MSX-Sublime-Tools
 # for updates and other MSX Sublime tools
 #
-# v1.3.1
-#   Added ##BB:monitor_exec=
-# v1.3.0
-# Added FUNC proto-function definition and calling
-# Added FN function name highlight
+# v1.4
+#   Added loop labels.
+#   Added line toggle.
+#   Added '' and ### comment blocks.
+#   Changed _ line break to allow using without space.
+#   Fixed " inside DATA.
+#   Fixed ## on last line.
+#   Fixed uppercase explicit variable on declare lines.
 
 author: Fred Rique (farique)
 url: https://github.com/farique1/MSX-Sublime-Tools
-comment: v1.3.1
+comment: v1.3.2
 
 name: MSX Basic Dignified
 file_extensions: bad
@@ -35,10 +38,24 @@ contexts:
         1: comment.msxbasic
         2: variable.parameter.msxbasic
         3: comment.msxbasic
-        4: entity.name.class.line.msxbasic
+        4: entity.name.class.msxbasic
+
+    # Comment block
+    - match: (^\s*'')
+      push:
+        - meta_scope: comment.msxbasic
+        - match: (''\s*$)
+          pop: true
+
+    # Comment block ###
+    - match: (^\s*###)
+      push:
+        - meta_scope: comment.msxbasic
+        - match: (###\s*$)
+          pop: true
 
     # Comment ##
-    - match: '(^|\s*)##.*\n'
+    - match: '(^|\s*)##.*$'
       scope: comment.msxbasic
 
     # Comment line ' and REM
@@ -47,7 +64,7 @@ contexts:
         - match: '{\d+?}'
         - meta_scope: comment.msxbasic
         - match: '{(\w+?|@)}'
-          scope: entity.name.class.line.msxbasic
+          scope: entity.name.class.msxbasic
         - match: (^\s*)((?i:endif))(?=\s*$)
           captures:
             2: invalid.deprecated.msxbasic
@@ -67,8 +84,28 @@ contexts:
         - match: '(?<!:)(?<!_)$\n'
           pop: true
 
+    # Line toggle keep
+    - match: '^\s*keep\s+'
+      scope: entity.name.tag.msxbasic
+      push:
+        - match: '#\w+\s+'
+          scope: entity.name.tag.msxbasic
+        - match: '.+'
+          scope: invalid.msxbasic
+        - match: '$'
+          pop: true
+
+    # Line toggle lines
+    - match: '^\s*(#\w+)\s+'
+      scope: entity.name.tag.msxbasic
+      push:
+        - match: '\s*\d+'
+          scope: invalid.deprecated.msxbasic
+        - match: '(?=\D)'
+          pop: true
+
     # DATA line highlights elements and comma only
-    - match: '\b(?i:data)\b'
+    - match: '\b(?i:data)(\b|(?=_))'
       push: data_line
       scope: keyword.control.msxbasic
 
@@ -78,11 +115,23 @@ contexts:
 
     # Labels with valid characters
     - match: '{(\w+?|@)}'
-      scope: entity.name.class.line.msxbasic
+      scope: entity.name.class.msxbasic
 
     # Labels with everything else
     - match: '{.+?}'
       scope: invalid.msxbasic
+
+    # Loop labels with only numbers
+    - match: '^\s*(\d+?){'
+      scope: invalid.msxbasic
+
+    # Loop labels open
+    - match: '^\s*(\w+?){\s*$'
+      scope: entity.name.class.msxbasic
+
+    # Loop labels close
+    - match: '^\s*}\s*$'
+      scope: entity.name.class.msxbasic
 
     # Round brackets balancing warning (only highlights missing closed)
     - match: \(
@@ -142,15 +191,15 @@ contexts:
       scope: entity.name.tag.msxbasic
 
     # Special cases for on xxx goto/gosub (are there more?)
-    - match: \b(?i:error|interval|key|sprite|stop|strig)\s*(?=(?i:goto|gosub))\b
+    - match: \b(?i:error|interval|key|sprite|stop|strig)\s*(?=(?i:goto|gosub))(\b|(?=_))
       scope: support.function.msxbasic
 
     # Special cases for defusr e usr
-    - match: \b(?i:def\s*usr(\d?))\b
+    - match: \b(?i:def\s*usr(\d?))(\b|(?=_))
       captures:
         0: keyword.control.msxbasic
         1: constant.numeric.msxbasic
-    - match: \b(?i:usr\s*(\d?)(?=\())\b
+    - match: \b(?i:usr\s*(\d?)(?=\())(\b|(?=_))
       captures:
         0: support.function.msxbasic
         1: constant.numeric.msxbasic
@@ -167,23 +216,23 @@ contexts:
     # review: base key play strig stick pdl pad time date set...
     # catching 'key' if after ^ or : unless followed by (
     # Call previous matches (\sadjust|\spause|\spcmplay|\spcmrec|(\s\w{,15})|\b)
-    - match: \b(?i:as(?=\s*#|\s*\w+\$)|auto|as|beep|bload|bsave|circle|clear|cload|close|cls|cmd|color|cont|copy|copy|csave|csrlin|data|(def)(dbl|(?=\s?fn)|int|sng|str)|delete|dim|draw|dsko\$|else|end|erase|error|field|files|for|get|gosub|goto|if|input(?!\$)|interval|ipl|kanji|key(?!(\()| +\()|kill|let|line|list|llist|load|locate|lprint|lset|maxfiles|merge|motor|name|new|next|off|on|open|out|output|paint|play(?!(\()| +\()|point|poke|preset|print|pset|put|read|renum|restore|resume|return|rset|run|save|screen|(set)(\sadjust|\sbeep|\spage|\spassword|\sprompt|\sscreen|\sscroll|\stitle|\svideo|\b)|sound|sprite\$|sprite|step|stop|swap|then|to|troff|tron|using|vpoke|wait|width)\b
-      scope: keyword.control.msxbasic
+    - match: \b(?i:as(?=\s*#|\s*\w+\$)|auto|as|beep|bload|bsave|circle|clear|cload|close|cls|cmd|color|cont|copy|copy|csave|csrlin|data|(def)(dbl|(?=\s?fn)|int|sng|str)|delete|dim|draw|dsko\$|else|end|erase|error|field|files|for|get|gosub|goto|if|input(?!\$)|interval|ipl|kanji|key(?!(\()| +\()|kill|let|line|list|llist|load|locate|lprint|lset|maxfiles|merge|motor|name|new|next|off|on|open|out|output|paint|play(?!(\()| +\()|point|poke|preset|print|pset|put|read|renum|restore|resume|return|rset|run|save|screen|(set)(\sadjust|\sbeep|\spage|\spassword|\sprompt|\sscreen|\sscroll|\stitle|\svideo|(\b|(?=_)))|sound|sprite\$|sprite|step|stop|swap|then|to|troff|tron|using|vpoke|wait|width)(\b|(?=_))
+      scope: keyword.msxbasic
 
     # Functions no $ (several are position and context sensitive)
     # review: base key play strig stick pdl pad time date set...
-    - match: \b(?i:abs|asc|atn|base|cdbl|cdbl|cint|cint|cos|csng|csng|cvd|cvi|cvs|date|dskf|eof|erl|err|exp|fix|fn|fpos|fre|inp|instr|int|key(?=(\(|\s+\())|len|loc|lof|log|lpos|pad|pdl|peek|play(?=(\(|\s+\())|pos|rnd|sgn|sin|spc|sqr|stick|strig|tab|tan|time|val|varptr|varptr|vdp|vpeek)\b
+    - match: \b(?i:abs|asc|atn|base|cdbl|cdbl|cint|cint|cos|csng|csng|cvd|cvi|cvs|date|dskf|eof|erl|err|exp|fix|fn|fpos|fre|inp|instr|int|key(?=(\(|\s+\())|len|loc|lof|log|lpos|pad|pdl|peek|play(?=(\(|\s+\())|pos|rnd|sgn|sin|spc|sqr|stick|strig|tab|tan|time|val|varptr|varptr|vdp|vpeek)(\b|(?=_))
       scope: support.function.msxbasic
 
     # Call and _ get any 15 char string.
-    - match: \b(call\s+|_\s*)(\w{,15})\b
+    - match: \b(call\s+|_\s*)(\w{,15})(\b|(?=_))
       captures:
-        1: keyword.control.msxbasic
+        1: keyword.msxbasic
         2: support.function.msxbasic
 
     # ? do not work with the \b on the instructions match
     - match: '[\?]'
-      scope: keyword.control.msxbasic
+      scope: keyword.msxbasic
 
     # Functions $ (several are position and context sensitive)
     - match: \b(?i:attr\$|bin\$|chr\$|hex\$|inkey\$|input\$|left\$|mid\$|mkd\$|mki\$|mks\$|oct\$|right\$|space\$|str\$|string\$)
@@ -195,7 +244,7 @@ contexts:
 
     # Endif if alone
     - match: (?i:^\s*endif\s*$)
-      scope: keyword.control.msxbasic
+      scope: keyword.msxbasic
 
     # Endif if not alone nor on rem, quote, data
     - match: (?i:endif)
@@ -207,7 +256,7 @@ contexts:
 
     # function name
     - match: (?i:)(\.\w+)(?=\()
-      scope: entity.name.class.line.msxbasic
+      scope: entity.name.class.msxbasic
 
     # colon - instruction separator
     - match: ':'
@@ -222,11 +271,11 @@ contexts:
       scope: keyword.operator.msxbasic
 
     # Operators names
-    - match: \b(?i:and|or|not|xor|eqv|imp|mod)\b
+    - match: \b(?i:and|or|not|xor|eqv|imp|mod)(\b|(?=_))
       scope: keyword.operator.msxbasic
 
     # Boolean type
-    - match: \b(?i:true|false)\b
+    - match: \b(?i:true|false)(\b|(?=_))
       scope: constant.numeric.msxbasic
 
     # Declare lines
@@ -242,7 +291,7 @@ contexts:
           scope: invalid.msxbasic
         - match: '(?<=\W)\w{0,2}(?=\W)'
           scope: invalid.msxbasic
-        - match: \s*(\w+)((\:)[a-z][a-z0-9]?)?\s*(?=\n|,|##)
+        - match: \s*(\w+)((\:)[A-Za-z][A-Za-z0-9]?)?\s*(?=\n|,|##)
           captures:
             1: constant.global.msxbasic
             2: variable.parameter.msxbasic
@@ -262,7 +311,7 @@ contexts:
         3: invalid.deprecated.msxbasic
 
     # Numbers
-    - match: '(#?)\b([0-9]+[0-9]*)(\.?)([ed][+-])?\b([%!#]?)'
+    - match: '(#?)\b([0-9]+[0-9]*)(\.?)([ed][+-])?(\b|(?=_))([%!#]?)'
       captures:
         1: keyword.operator.msxbasic
         2: constant.numeric.msxbasic
@@ -308,7 +357,7 @@ contexts:
 
     # Quotes: show join line character _
   double_quoted_string:
-    - meta_scope: string.quoted.double.msxbasic
+    - meta_scope: string.msxbasic
     - match: '_(\s+$)'
       scope: entity.name.tag.msxbasic
     - match: '"|[^_]$'
@@ -318,6 +367,12 @@ contexts:
     # But _ MUST also be added before the ## so the lines can join
   data_line:
     - meta_scope: constant.global.msxbasic
+    - match: '"'
+      push:
+        - match: ':'
+          scope: constant.global.msxbasic
+        - match: '("|(?=\n))'
+          pop: true
     - match: ','
       scope: keyword.operator.msxbasic
     - match: '(_)(\s+($|(##.*\n)))'
@@ -328,8 +383,6 @@ contexts:
         - match: $|(?=:)
           pop: true
         - include: data_line
-    - match: '".*"'
-      scope: constant.global.msxbasic
     - match: '(?<!\S)##.*'
       scope: comment.msxbasic
     - match: (^\s*)((?i:endif))(?=\s*$)
