@@ -1,18 +1,34 @@
 {
-    "cmd": ["python3", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic"],
-    "selector": "source.msxbasic",
-    "working_dir": "$project_path",
-    "file_patterns": "*.bas",
-    "syntax": "MSX Badig Build.sublime-syntax",
-    "variants": [
+  "cmd": ["python3", "-u", "$packages/User/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic"],
+  "selector": "source.msxbasic",
+  "working_dir": "$project_path",
+  "file_patterns": "*.bas",
+  "syntax": "MSX Badig Build.sublime-syntax",
+  "windows": {
+      "cmd": ["python", "-u", "$packages/User/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic"]
+  },
 
-	    { "name": "Tokenize only",
-	      "cmd": ["python3", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize", "-convert"],
-	    },
-	    { "name": "Tokenize and save list",
-	      "cmd": ["python3", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize", "-convert", "-list"],
-	    },
-        { "name": "Tokenize and run",
-          "cmd": ["python3", "-u", "$packages/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize"],
-        }	]
-} 
+  "variants": [
+
+    { "name": "Tokenize only",
+      "cmd": ["python3", "-u", "$packages/User/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize", "-convert"],
+      "windows": {
+        "cmd": ["python", "-u", "$packages/User/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize", "-convert"]
+      },
+    },
+
+    { "name": "Tokenize and save list",
+      "cmd": ["python3", "-u", "$packages/User/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize", "-convert", "-list"],
+      "windows": {
+        "cmd": ["python", "-u", "$packages/User/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize", "-convert", "-list"]
+      },
+    },
+    
+    { "name": "Tokenize and run",
+        "cmd": ["python3", "-u", "$packages/User/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize"],
+      "windows": {
+        "cmd": ["python", "-u", "$packages/User/MSX/MSX Badig Build.py", "$file_path", "$file_name", "-classic", "-tokenize"]
+      }
+    }
+  ]
+}

@@ -1,23 +1,24 @@
-  
 <img src="https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/GitHub_SublimeTools_Logo-02.png" alt="MSX Sublime Tools" width="290" height="130">  
   
 # MSX Sublime Tools  
-**v1.5**  
-For **Sublime Text 3**  
+**v1.6**  
+For **Sublime Text 3-4**  
   
-**MSX Sublime Tools** are a set of tools developed for Sublime Text 3 created to improve the experience of working with **MSX Basic Dignified** and regular **MSX Basic** programs.  
+**MSX Sublime Tools** are a set of tools developed for Sublime Text 4 created to improve the experience of working with **MSX Basic Dignified** and regular **MSX Basic** programs.  
   
 >[**MSX Basic Dignified**](https://github.com/farique1/msx-basic-dignified) is a 'dialect' of MSX Basic using modern coding style and standards that can be composed on any text editor and converted to the traditional MSX Basic to be executed.  
   
 The tools are:  
 - A **Build System** for the Dignified and traditional versions of MSX Basic with conversion, tokenization and execution monitoring capabilities.  
 - **Syntax Highlight**s for the Dignified and traditional versions of MSX Basic.  
-- **Theme**s based on Boxy Ocean and Monokai with special scopes for both Basic versions.  
+- **Themes** based on Boxy Ocean and Monokai with special scopes for both Basic versions.  
 - A **Theme** simulating the blue MSX 1 screen and accompanying **MSX Screen 0 font**.  
 - **Snippets** for the Dignified version of MSX Basic.  
 - A **Comment Preference** for the Dignified version.  
   
-To install, just clone this repo and copy all root files into an `MSX` folder inside the Sublime `Packages` folder (`~/Library/Application Support/Sublime Text 3/Packages/` on a Mac).  
+To install, just clone this repo and copy all root files into an `MSX` folder inside the Sublime `Packages` folder  
+(`C:\Users\<USER_NAME>\AppData\Roaming\Sublime Text\Packages\` on Windows).  
+(`~/Library/Application Support/Sublime Text 3/Packages/` on MacOS).  
   
 The Dignified Basic version uses a `.bad` extension and the traditional ASCII Basic an `.asc` one.  
   
@@ -25,13 +26,12 @@ The Dignified Basic version uses a `.bad` extension and the traditional ASCII Ba
   
 The Dignified code can be converted, tokenized and run straight from Sublime using **MSX Basic Dignified**, **openMSX** and one of the **MSX Basic Toknizer**s. It can also have its execution monitored for Basic errors and have the offending Dignified lines tagged back on Sublime.  
 Traditional MSX Basic can also be tokenized and run from Sublime, no monitoring here unfortunately.  
+There is also no monitoring capabilities no Windows for now.  
 A list file similar to the ones exported by assemblers with the tokens alongside the ASCII code and some statistics can also be exported (see an eaxample at [**MSX Basic Tokenizer**](https://github.com/farique1/MSX-Basic-Tokenizer)).  
 Sublime will display the build output on the console and highlight warnings and errors.  
   
 >When using **openMSX** to execute or monitor the code be aware that the saving folder will be mounted on the MSX as a disk and all constrains of that filesystem apply including file size, name size, lack of spaces on the names, etc. (the build system will try to mitigate some of these but caution is the better approach.)  
-  
->The build system only works on a Mac for now mostly due to path differences and the way **openMSX** is executed.  
-  
+    
 >The Build System uses Python 3.8.  
   
   
@@ -45,7 +45,7 @@ MSX Basic.sublime-build
 openMSXoutput.tcl  
 ```  
   
-Depending on what functionality is required the aforementioned programs need to be installed:  
+Depending on what functionality is required, the following programs need to be installed:  
   
 - If coding in the Dignified flavour, a copy of **MSX Basic Dignified** is needed.  
 - **MSX Basic Tokenizer** or **openMSX Basic (de)Tokenizer** are needed for tokenized output and list export.  
@@ -60,11 +60,7 @@ The path to these programs can be set up on the code itself or on `MSX Badig Bui
 The only configuration necessary on the `.ini` file are the paths to the support programs being used and any modification to the default behaviour of the build system. All other settings can be left blank.  
   
 ```ini  
-[DEFAULT]  
-msxbadig_filepath = [/path_to/msxbadig.py]  
-batoken_filepath = [/path_to/msxbatoken.py]  
-openbatoken_filepath = [/path_to/openmsxbatoken.py]  
-openmsx_filepath = [/path_to/openmsx.app]  
+[CONFIGS]
 machine_name = [optional alternative machine name]  
 disk_ext_name = [optional disk extension]  
 monitor_exec = [true,false]  
@@ -73,7 +69,21 @@ tokenize = [true,false]
 tokenize_tool = [b,o]  
 tokenize_stop = [true,false]  
 verbose_level = [#]  
+
+[WINPATHS]
+msxbadig_filepath = [/path_to/msxbadig.py]  
+batoken_filepath = [/path_to/msxbatoken.py]  
+openbatoken_filepath = [/path_to/openmsxbatoken.py]  
+openmsx_filepath =  [/path_to/openmsx.exe]  
+
+[MACPATHS]
+msxbadig_filepath = [/path_to/msxbadig.py]  
+batoken_filepath = [/path_to/msxbatoken.py]  
+openbatoken_filepath = [/path_to/openmsxbatoken.py]  
+openmsx_filepath = [/path_to/openmsx.app]  
 ```  
+  
+> To maintain compatibility across Windows and MacOS there are individual path sections in the `.ini` file for each of the systems. This is so if you are like me you can just be working on the same program on a PC and a Mac **at the same time**.  
   
 `msxbadig_filepath = `  
 The path to **MSX Basic Dignified**  
@@ -163,15 +173,17 @@ The builds are available from the `Tools > Build System` menu and are called:
 `MSX Basic Dignified`  
   
 The build type can be left on `automatic` when using syntax scopes and the extensions of the Basic flavours, Sublime will choose and use the correct one.  
-To run the build just press COMMAND-B on Sublime.  
+To run the build just press CONTROL-B on Windows or COMMAND-B on MacOX on Sublime.  
   
 When building the Dignified version, by default, the converted, traditional, code will be saved on the same path as the Dignified with an `.asc` extension. A tokenized version will also be saved with a `.bas` extension. **openMSX** will then be opened, mount this folder as a disk and run the `.bas` tokenized version. If no tokenized version was saved, the ASCII `.asc` version will be chosen instead. The execution of the code will then be monitored on **openMSX** and Basic errors will be reported back to Sublime and the correct line will be tagged. A program *Break* will also be reported and direct command errors will generate warnings.  
-When using openMSX, Badig Build will try to internally conform the file name to the MSX disk 8 characters and no spaces but some conflict can occur. It is best to always work with 8 characters, no spaces files.  
+> There is no monitoring on Windows for now.  
+
+When using openMSX, Badig Build will try to internally conform the file name to the MSX disk 8 characters and no spaces but some conflict can occur. It is recommended to always work with 8 characters and no spaces on the file names.  
   
-> When using `on error` to catch and customize errors on MSX Basic, always use a `CHR$(7)` (*BEEP*) character and pass the line number as the last text on the error message to make sure the monitoring algorithm will catch and parse the error and its location correctly.  
+> When using `on error` to catch and customize errors on MSX Basic, always use a `CHR$(7)` (*BEEP*) character and pass the line number at the end of the srting on the error message to make sure the monitoring algorithm will catch and parse the error and its location correctly.  
   
-Each of the builds have some variants that can be chosen by pressing COMMAND-SHIFT-B.  
-Once they are chosen they will be used as the default COMMAND-B build until Sublime is closed or another variant is chosen. They are:  
+Each of the builds have some variants that can be chosen by pressing CONTROL-SHIFT-B on Windows or COMMAND-SHIFT-B on MacOS.  
+Once they are chosen they will be used as the default CONTROL/COMMAND-B build until Sublime is closed or another variant is chosen. They are:  
   
 - MSX Basic Dignified:  
 `Default`: Will convert, tokenize, run and monitor the Dignified code.  

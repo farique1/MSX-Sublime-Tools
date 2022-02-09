@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 MSX Badig Build
-v1.4
-A Sublime 3 build system to convert MSX Basic Dignified to traditional MSX Basic and run on openMSX
+v1.5
+A Sublime Text 4 build system to convert MSX Basic Dignified to traditional MSX Basic and run on openMSX
 or tokenize and run ASCII MSX Basic on openMSX.
 
-Copyright (C) 2019-2020 - Fred Rique (farique)
+Copyright (C) 2019-2022 - Fred Rique (farique)
 https://github.com/farique1/MSX-Sublime-Tools
 
 MSX Basic Dignified at
@@ -16,18 +16,15 @@ https://github.com/farique1/MSX-Basic-Tokenizer
 
 Installation notes on the README.md
 
-New: 1.4 17-02-2020
-    Python 3.8.
-    Added correct exception to argument errors.
-    Added compatibility to the new Badig arguments.
-    Fixed bug and better handling of files with spaces and more than 8 characters.
-        Files opened on openMSX now are internally croped to 8 char and have spaces replaced with _
-        Error if conflicting file names due to disk format limitations.
-    Better subprocess call and IO handling.
-    Changed -fb to -frb.
+New: 1.5 03/12/2021
+    WINDOWS COMPATIBILITY YEY!
+        Individual Windows and Mac paths on the .INI file
+        os.path() operations to improve compatibility across systems
+    Changed .INI section names
 """
 
 import os.path
+import platform
 import argparse
 import subprocess
 import configparser
@@ -45,6 +42,9 @@ tokenize = False            # Tokenize the ASCII code
 tokenize_tool = 'b'         # Tool used to tokenize the ASCII code: b-MSX Basic Tokenizer(def) o-openMSX Basic Tokenizer
 tokenize_stop = True        # Stop the execution on tokenize errors (keeps the ASCII version)
 verbose_level = 3           # Show processing status: 0-silent 1-+erros 2-+warnings 3-+steps 4-+details
+
+is_windows = platform.system() == "Windows"  # Get the operating system
+python_app = 'python' if is_windows else 'python3'
 
 
 def show_log(line, text, level, **kwargs):
@@ -94,7 +94,7 @@ parser.add_argument("-tokenize", default=tokenize, action='store_true', help='To
 parser.add_argument("-list", action='store_true', help='Save a .mlt list file')
 args = parser.parse_args()
 
-export_path = args.file_path + '/'
+export_path = args.file_path
 export_file = os.path.splitext(args.file_name)[0] + '.asc'
 classic_basic = args.classic
 convert_only = args.convert
@@ -103,24 +103,26 @@ tokenize = args.tokenize
 save_list = args.list
 file_load = args.file_name
 
-local_path = os.path.split(os.path.abspath(__file__))[0] + '/'
-if os.path.isfile(local_path + 'MSX Badig Build.ini'):
+local_path = os.path.split(os.path.abspath(__file__))[0]
+ini_path = os.path.join(local_path, 'MSX Badig Build.ini')
+if os.path.isfile(ini_path):
+    ini_section = 'WINPATHS' if is_windows else 'MACPATHS'
     config = configparser.ConfigParser()
     config.sections()
     try:
-        config.read(local_path + 'MSX Badig Build.ini')
-        msxbadig_filepath = config.get('DEFAULT', 'msxbadig_filepath') if config.get('DEFAULT', 'msxbadig_filepath') else msxbadig_filepath
-        batoken_filepath = config.get('DEFAULT', 'batoken_filepath') if config.get('DEFAULT', 'batoken_filepath') else batoken_filepath
-        openbatoken_filepath = config.get('DEFAULT', 'openbatoken_filepath') if config.get('DEFAULT', 'openbatoken_filepath') else openbatoken_filepath
-        openmsx_filepath = config.get('DEFAULT', 'openmsx_filepath') if config.get('DEFAULT', 'openmsx_filepath') else openmsx_filepath
-        machine_name = config.get('DEFAULT', 'machine_name') if config.get('DEFAULT', 'machine_name') else machine_name
-        disk_ext_name = config.get('DEFAULT', 'disk_ext_name') if config.get('DEFAULT', 'disk_ext_name').strip() else disk_ext_name
-        throttle = config.getboolean('DEFAULT', 'throttle') if config.get('DEFAULT', 'throttle') else throttle
-        monitor_exec = config.getboolean('DEFAULT', 'monitor_exec') if config.get('DEFAULT', 'monitor_exec') else monitor_exec
-        tokenize = config.getboolean('DEFAULT', 'tokenize') if config.get('DEFAULT', 'tokenize') else tokenize
-        tokenize_tool = config.get('DEFAULT', 'tokenize_tool') if config.get('DEFAULT', 'tokenize_tool') else tokenize_tool
-        tokenize_stop = config.getboolean('DEFAULT', 'tokenize_stop') if config.get('DEFAULT', 'tokenize_stop') else tokenize_stop
-        verbose_level = config.getint('DEFAULT', 'verbose_level') if config.get('DEFAULT', 'verbose_level') else verbose_level
+        config.read(ini_path)
+        msxbadig_filepath = config.get(ini_section, 'msxbadig_filepath') if config.get(ini_section, 'msxbadig_filepath') else msxbadig_filepath
+        batoken_filepath = config.get(ini_section, 'batoken_filepath') if config.get(ini_section, 'batoken_filepath') else batoken_filepath
+        openbatoken_filepath = config.get(ini_section, 'openbatoken_filepath') if config.get(ini_section, 'openbatoken_filepath') else openbatoken_filepath
+        openmsx_filepath = config.get(ini_section, 'openmsx_filepath') if config.get(ini_section, 'openmsx_filepath') else openmsx_filepath
+        machine_name = config.get('CONFIGS', 'machine_name') if config.get('CONFIGS', 'machine_name') else machine_name
+        disk_ext_name = config.get('CONFIGS', 'disk_ext_name') if config.get('CONFIGS', 'disk_ext_name').strip() else disk_ext_name
+        throttle = config.getboolean('CONFIGS', 'throttle') if config.get('CONFIGS', 'throttle') else throttle
+        monitor_exec = config.getboolean('CONFIGS', 'monitor_exec') if config.get('CONFIGS', 'monitor_exec') else monitor_exec
+        tokenize = config.getboolean('CONFIGS', 'tokenize') if config.get('CONFIGS', 'tokenize') else tokenize
+        tokenize_tool = config.get('CONFIGS', 'tokenize_tool') if config.get('CONFIGS', 'tokenize_tool') else tokenize_tool
+        tokenize_stop = config.getboolean('CONFIGS', 'tokenize_stop') if config.get('CONFIGS', 'tokenize_stop') else tokenize_stop
+        verbose_level = config.getint('CONFIGS', 'verbose_level') if config.get('CONFIGS', 'verbose_level') else verbose_level
     except (ValueError, configparser.NoOptionError) as e:
         show_log('', '', 1, bullet=0)
         show_log('', 'MSX Badig Build.ini: ' + str(e), 1)
@@ -142,18 +144,19 @@ arguments_line = ''
 line_chama = ''
 line_list = {}
 included_dict = {}
+
 if msxbadig_filepath == '':
-    msxbadig_filepath = local_path + 'MSXBadig.py'
+    msxbadig_filepath = os.path.join(local_path, 'MSXBadig.py')
 if batoken_filepath == '':
-    batoken_filepath = local_path + 'MSXBatoken.py'
+    batoken_filepath = os.path.join(local_path, 'MSXBatoken.py')
 if openbatoken_filepath == '':
-    openbatoken_filepath = local_path + 'openMSXBatoken.py'
+    openbatoken_filepath = os.path.join(local_path, 'openMSXBatoken.py')
 if openmsx_filepath == '':
-    openmsx_filepath = local_path + 'openMSX.app'
+    openmsx_filepath = local_path
 if tokenize_tool == 'O':
     batoken_filepath = openbatoken_filepath
 
-show_log('', ''.join(['Building ', args.file_path, '/', args.file_name]), 3, bullet=0)
+show_log('', ''.join(['Building ', os.path.join(args.file_path, args.file_name)]), 3, bullet=0)
 show_log('', '', 3, bullet=0)
 show_log('', ''.join([('Classic Basic' if classic_basic else 'Basic Dignified')]), 3)
 if classic_basic:
@@ -177,17 +180,20 @@ if not os.path.isfile(openbatoken_filepath) and (tokenize and tokenize_tool == '
 if not os.path.isfile(batoken_filepath) and (tokenize and tokenize_tool == 'B'):
     show_log('', ''.join(['MSX_Basic_tokenizer.py_not_found: ', batoken_filepath]), 1)  # Exit
 
-if not os.path.isdir(openmsx_filepath) and (not convert_only or monitor_exec):
-    show_log('', ''.join(['openMSX_not_found: ', openmsx_filepath]), 1)  # Exit
+if is_windows:
+    if not os.path.isfile(openmsx_filepath) and (not convert_only or monitor_exec):
+        show_log('', ''.join(['openMSX_not_found: ', openmsx_filepath]), 1)  # Exit
+else:
+    if not os.path.isdir(openmsx_filepath) and (not convert_only or monitor_exec):
+        show_log('', ''.join(['openMSX_not_found: ', openmsx_filepath]), 1)  # Exit
+
 
 show_log('', '', 3, bullet=5)
 
-with open(args.file_path + '/' + args.file_name, encoding='latin1') as f:
+with open(os.path.join(args.file_path, args.file_name), encoding='latin1') as f:
     for n, line in enumerate(f):
         if line.startswith('##BB:export_path='):
             export_path = line.replace('##BB:export_path=', '').strip()
-            if export_path[-1:] != '/':
-                export_path += '/'
         if line.startswith('##BB:export_file='):
             export_file = line.replace('##BB:export_file=', '').strip()
         if line.startswith('##BB:throttle='):
@@ -229,8 +235,8 @@ with open(args.file_path + '/' + args.file_name, encoding='latin1') as f:
                 arg[num] = item2
 
 if monitor_exec:
-    if os.path.isfile(local_path + 'openMSXoutput.tcl'):
-        call_monitor_tcl = ['-script', local_path + 'openMSXoutput.tcl']
+    if os.path.isfile(os.path.join(local_path, 'openMSXoutput.tcl')):
+        call_monitor_tcl = ['-script', os.path.join(local_path, 'openMSXoutput.tcl')]
         arg[arg_num - 1] = '-exe'
     else:
         show_log('', ''.join(['openMSXoutput.tcl_script_not_found_(monitoring_disabled)']), 2)
@@ -248,12 +254,12 @@ if len(disk_ext) > 1:
 if not classic_basic:
     args_token = list(set(arg))
     show_log('', 'MSX Basic Dignified', 3, bullet=0)
-    show_log('', ''.join(['Converting ', args.file_path, '/', args.file_name]), 3, bullet=0)
-    show_log('', ''.join(['To ', export_path, export_file]), 3, bullet=0)
+    show_log('', ''.join(['Converting ', os.path.join(args.file_path, args.file_name)]), 3, bullet=0)
+    show_log('', ''.join(['To         ', os.path.join(export_path, export_file)]), 3, bullet=0)
     show_log('', ''.join(['With args ', ' '.join(args_token)]), 3, bullet=0)
     try:
         # This... thing... here? I know, I know Leave me alone!
-        chama = ['python3', '-u', msxbadig_filepath, args.file_path + '/' + args.file_name, export_path + export_file]
+        chama = [python_app, '-u', msxbadig_filepath, os.path.join(args.file_path, args.file_name), os.path.join(export_path, export_file)]
         chama.extend(arg)
         output = subprocess.check_output(chama, encoding='utf-8')
         for line in output:
@@ -290,11 +296,11 @@ else:
         args_token = list(set(list_arg))
         name_prefix = '' if tokenize_tool == 'B' else 'open'
         show_log('', name_prefix + 'MSX Basic Tokenizer', 3, bullet=0)
-        show_log('', ''.join(['Converting ', export_path, '/', export_file]), 3, bullet=0)
-        show_log('', ''.join(['To ', export_path, '/', os.path.splitext(export_file)[0] + '.bas']), 3, bullet=0)
+        show_log('', ''.join(['Converting ', os.path.join(export_path, export_file)]), 3, bullet=0)
+        show_log('', ''.join(['To         ', os.path.join(export_path, os.path.splitext(export_file)[0]) + '.bas']), 3, bullet=0)
         show_log('', ''.join(['With ', 'args ', ' '.join(args_token)]), 3, bullet=0)
         if os.path.isfile(batoken_filepath):
-            batoken = ['python3', '-u', batoken_filepath, export_path + '/' + export_file, list_arg[0], list_arg[1], list_arg[2]]
+            batoken = [python_app, '-u', batoken_filepath, os.path.join(export_path, export_file), list_arg[0], list_arg[1], list_arg[2]]
             btoutput = subprocess.check_output(batoken, encoding='utf-8')
             for line in btoutput:
                 btline += line
@@ -355,7 +361,7 @@ def output(show_output, has_input, step):
 
 
 show_log('', 'openMSX', 3, bullet=0)
-show_log('', ''.join(['Opeening ', export_path, '/', export_file]), 3, bullet=0)
+show_log('', ''.join(['Opeening ', os.path.join(export_path, export_file)]), 3, bullet=0)
 show_log('', ''.join(['As a ', using_machine]), 3, bullet=0)
 show_log('', ''.join(['With ', disk_ext_name, (' extension at ' + disk_ext_slot if disk_ext_name != '' else 'no extension')]), 3, bullet=0)
 show_log('', ''.join(['Throttle ', ('enabled' if throttle else 'disabled')]), 3, bullet=0)
@@ -369,22 +375,27 @@ if tokenize_tool == 'O':
 
 list_dir = os.listdir(export_path)
 list_export = [x for x in list_dir if
-               x.lower() != export_file.lower() and
-               os.path.splitext(x)[0][0:8].replace(' ', '_').lower() +
-               os.path.splitext(x)[1].replace(' ', '_').lower() ==
-               crop_export.lower()]
+               x.lower() != export_file.lower()
+               and os.path.splitext(x)[0][0:8].replace(' ', '_').lower()
+               + os.path.splitext(x)[1].replace(' ', '_').lower()
+               == crop_export.lower()]
 if list_export:
     show_log('', ' '.join(['MSX_disk_name_format_conflict', ', '.join(list_export), '=', export_file, '(' + crop_export + ')']), 1)  # Exit
 
 export_path = export_path.replace(' ', r'\ ')
 
-cmd = [openmsx_filepath + '/contents/macos/openmsx', '-control', 'stdio']
+if is_windows:
+    export_path = export_path.replace('\\', '/')  # cmd apparently needs forward slashes even on Windows
+    cmd = [openmsx_filepath, '-control', 'stdio']
+else:
+    cmd = [os.path.join(openmsx_filepath, 'contents', 'macos', 'openmsx'), '-control', 'stdio']
+
 if machine_name != '':
     cmd.extend(machine_name)
 if monitor_exec:
     cmd.extend(call_monitor_tcl)
 
-proc = subprocess.Popen(cmd, bufsize=1, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+proc = subprocess.Popen(cmd, bufsize=1, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', close_fds=True)
 
 endline = '\r\n'
 
@@ -430,14 +441,17 @@ output(show_output, True, 'Type cls and run')
 
 show_log('', '', 3, bullet=0)
 
-if monitor_exec:
+if monitor_exec and is_windows:
+    show_log('', 'Execution monitoring not yet supported on Windows', 2)
+    show_log('', '', 1, bullet=0)
+elif monitor_exec:
     show_log('', 'Monitoring execution', 3, bullet=0)
     show_log('', '', 3, bullet=0)
 
     for line in iter(proc.stdout.readline, b''):
         poll = proc.poll()
         if poll is not None:
-            print ()
+            print()
             raise SystemExit(0)
         if '\x07' in line and '\x0c' not in line:
             line_out = line.replace('\x0d', '').replace('\x07', '').rstrip()

@@ -3,9 +3,15 @@
   
 ## MSX Badig Build  
   
-### **v1.4**  
-***17-2-2020***  
+### **v1.5**  
+***3-12-2021***    
+- WINDOWS COMPATIBILITY YEY!  
+	- Individual Windows and Mac paths on the `.ini` file.  
+	- `os.path()` operations to improve compatibility across systems.  
+- Changed `.ini` section names.  
   
+### **v1.4**  
+***17-2-2020***    
 - Python 3.8.  
 - Added correct exception to argument errors.  
 - Added compatibility to the new Badig arguments.  
