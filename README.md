@@ -1,7 +1,6 @@
 <img src="https://github.com/farique1/MSX-Sublime-Tools/blob/master/Images/GitHub_SublimeTools_Logo-02.png" alt="MSX Sublime Tools" width="290" height="130">  
   
 # MSX Sublime Tools  
-**v1.6**  
 For **Sublime Text 3-4**  
   
 **MSX Sublime Tools** are a set of tools developed for Sublime Text 4 created to improve the experience of working with **MSX Basic Dignified** and regular **MSX Basic** programs.  
